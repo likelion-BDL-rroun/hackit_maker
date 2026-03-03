@@ -696,7 +696,7 @@ export const SidebarContent = ({ activeTab, onExport }: { activeTab: SidebarTab;
                     <div className="text-left">
                       <span style={{ fontSize: '13px', fontWeight: 600 }} className="text-gray-800 block uppercase">{fmt}</span>
                       <span style={{ fontSize: '10px', fontWeight: 400 }} className="text-gray-400">
-                        {fmt === 'png' && '투명 배경 지원 · 고화질'}
+                        {fmt === 'png' && '투명 배경 미지원 · 고화질'}
                         {fmt === 'jpg' && '작은 파일 크기 · SNS 최적'}
                         {fmt === 'pdf' && '인쇄 및 공유용'}
                       </span>
