@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useEditorStore } from '../store/useEditorStore';
 import { FORMATS, FormatType } from '../store/types';
-import { GRAPHICS, BRAND_LOGOS, LOGO_COLORS } from '../store/graphics';
+import { GRAPHICS, BRAND_LOGOS } from '../store/graphics';
 import { cn } from '../../lib/utils';
 import {
   Trash2, Eye, EyeOff, ChevronUp, ChevronDown, Lock, Unlock,
@@ -55,7 +55,6 @@ export const SidebarContent = ({ activeTab, onExport }: { activeTab: SidebarTab;
 
   const [graphicSearch, setGraphicSearch] = useState('');
   const [exportFormat, setExportFormat] = useState<'png' | 'jpg' | 'pdf'>(isA3 ? 'pdf' : 'png');
-  const [logoColor, setLogoColor] = useState<string>('#FF6000');
 
   // Auto-select PDF when A3 is chosen
   useEffect(() => {
@@ -111,7 +110,7 @@ export const SidebarContent = ({ activeTab, onExport }: { activeTab: SidebarTab;
       height: h,
       rotation: 0,
       graphicName: logo.name,
-      style: { color: logoColor },
+      style: { color: themeColor },
       content: logo.path,
       imageUrl: logo.imageUrl,
       isLogo: true,
@@ -139,7 +138,7 @@ export const SidebarContent = ({ activeTab, onExport }: { activeTab: SidebarTab;
       height: h,
       rotation: 0,
       content: p.text,
-      style: { fontSize, fontWeight: p.fontWeight, color: '#000000', textAlign: 'center' },
+      style: { fontSize, fontWeight: p.fontWeight, color: themeColor, textAlign: 'center' },
     });
   };
 
@@ -283,81 +282,8 @@ export const SidebarContent = ({ activeTab, onExport }: { activeTab: SidebarTab;
       {/* ===== 그래픽 탭 ===== */}
       {activeTab === 'graphics' && (
         <div className="space-y-5">
-          {/* ===== 1) 로고 섹션 ===== */}
+          {/* ===== 1) 그래픽 컬러 (컬러 선택) ===== */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 style={{ fontSize: '13px', fontWeight: 700 }} className="text-gray-900">로고</h3>
-              <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-400" style={{ fontSize: '9px', fontWeight: 600 }}>
-                브랜드 자산
-              </span>
-            </div>
-
-            {/* Logo color picker — restricted to 3 brand colors */}
-            <div className="flex items-center gap-2">
-              <span style={{ fontSize: '11px', fontWeight: 500 }} className="text-gray-400 mr-1">로고 컬러</span>
-              {LOGO_COLORS.map((c) => {
-                const isNearWhite = c.toUpperCase() === '#F9F9F9';
-                const isActive = logoColor.toUpperCase() === c.toUpperCase();
-                return (
-                  <button
-                    key={c}
-                    onClick={() => setLogoColor(c)}
-                    className={cn(
-                      "rounded-full transition-all duration-200 cursor-pointer",
-                      isActive
-                        ? "w-8 h-8 scale-105"
-                        : "w-7 h-7 hover:scale-105"
-                    )}
-                    style={{
-                      backgroundColor: c,
-                      boxShadow: isActive
-                        ? isNearWhite
-                          ? '0 0 0 2.5px #FF6000, inset 0 0 0 1px #E5E7EB, 0 2px 8px rgba(0,0,0,0.1)'
-                          : '0 0 0 2.5px #FF6000, 0 2px 8px rgba(0,0,0,0.1)'
-                        : isNearWhite
-                          ? 'inset 0 0 0 1px #E5E7EB'
-                          : '0 0 0 1px rgba(0,0,0,0.06)',
-                    }}
-                    title={c}
-                  />
-                );
-              })}
-            </div>
-
-            {/* Logo grid */}
-            <div className="grid grid-cols-3 gap-2.5">
-              {BRAND_LOGOS.map((logo, i) => (
-                <button
-                  key={`logo-${logo.name}-${i}`}
-                  onClick={() => handleAddLogo(logo)}
-                  className="group aspect-[5/2] bg-[#F5F6F8] hover:bg-[#EDEEF1] rounded-[10px] flex items-center justify-center p-2.5 transition-all border border-gray-100/80 hover:border-gray-200 hover:shadow-[0_2px_12px_rgba(0,0,0,0.06)] cursor-pointer"
-                  title={logo.name}
-                >
-                  <div
-                    className="w-full h-full transition-transform group-hover:scale-105"
-                    style={{
-                      backgroundColor: logoColor,
-                      WebkitMaskImage: `url(${logo.imageUrl})`,
-                      WebkitMaskSize: 'contain',
-                      WebkitMaskRepeat: 'no-repeat',
-                      WebkitMaskPosition: 'center',
-                      maskImage: `url(${logo.imageUrl})`,
-                      maskSize: 'contain',
-                      maskRepeat: 'no-repeat',
-                      maskPosition: 'center',
-                    }}
-                  />
-                </button>
-              ))}
-            </div>
-
-            <p style={{ fontSize: '10.5px', fontWeight: 400 }} className="text-gray-400 px-0.5 leading-relaxed">
-              로고는 브랜드 컬러 3종만 사용할 수 있으며, 그래픽 컬러 통일 규칙이 적용되지 않습니다.
-            </p>
-          </div>
-
-          {/* ===== 2) 그래픽 컬러 섹션 ===== */}
-          <div className="pt-3 border-t border-gray-100 space-y-3">
             <div className="relative bg-white rounded-[12px] border border-gray-100/80 shadow-[0_1px_4px_rgba(0,0,0,0.03)] p-3">
               <div className="flex items-center gap-3">
                 {/* Clickable color preview */}
@@ -391,7 +317,7 @@ export const SidebarContent = ({ activeTab, onExport }: { activeTab: SidebarTab;
 
             {/* Helper text — outside card */}
             <p style={{ fontSize: '10.5px', fontWeight: 400 }} className="text-gray-400 px-0.5 leading-relaxed">
-              모든 그래픽에 동일한 컬러가 적용됩니다.
+              그래픽, 로고, 텍스트에 동일한 컬러가 적용됩니다.
             </p>
 
             {/* Preset swatches */}
@@ -426,6 +352,47 @@ export const SidebarContent = ({ activeTab, onExport }: { activeTab: SidebarTab;
                 })}
               </div>
             </div>
+          </div>
+
+          {/* ===== 2) 로고 섹션 ===== */}
+          <div className="pt-3 border-t border-gray-100 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 style={{ fontSize: '13px', fontWeight: 700 }} className="text-gray-900">로고</h3>
+              <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-400" style={{ fontSize: '9px', fontWeight: 600 }}>
+                브랜드 자산
+              </span>
+            </div>
+
+            {/* Logo grid — uses same global color as graphics */}
+            <div className="grid grid-cols-3 gap-2.5">
+              {BRAND_LOGOS.map((logo, i) => (
+                <button
+                  key={`logo-${logo.name}-${i}`}
+                  onClick={() => handleAddLogo(logo)}
+                  className="group aspect-[5/2] bg-[#F5F6F8] hover:bg-[#EDEEF1] rounded-[10px] flex items-center justify-center p-2.5 transition-all border border-gray-100/80 hover:border-gray-200 hover:shadow-[0_2px_12px_rgba(0,0,0,0.06)] cursor-pointer"
+                  title={logo.name}
+                >
+                  <div
+                    className="w-full h-full transition-transform group-hover:scale-105"
+                    style={{
+                      backgroundColor: themeColor,
+                      WebkitMaskImage: `url(${logo.imageUrl})`,
+                      WebkitMaskSize: 'contain',
+                      WebkitMaskRepeat: 'no-repeat',
+                      WebkitMaskPosition: 'center',
+                      maskImage: `url(${logo.imageUrl})`,
+                      maskSize: 'contain',
+                      maskRepeat: 'no-repeat',
+                      maskPosition: 'center',
+                    }}
+                  />
+                </button>
+              ))}
+            </div>
+
+            <p style={{ fontSize: '10.5px', fontWeight: 400 }} className="text-gray-400 px-0.5 leading-relaxed">
+              로고에도 위 그래픽 컬러가 동일하게 적용됩니다.
+            </p>
           </div>
 
           {/* ===== 3) 그래픽 에셋 섹션 ===== */}
@@ -551,7 +518,7 @@ export const SidebarContent = ({ activeTab, onExport }: { activeTab: SidebarTab;
 
           <div className="p-3 bg-gray-50 rounded-[8px] border border-gray-100 mt-3">
             <p style={{ fontSize: '11px', fontWeight: 500 }} className="text-gray-500 leading-relaxed">
-              폰트는 브랜드 일관성을 위해 <span style={{ fontWeight: 700 }}>Cabinet Grotesk</span>로 고정됩니다. 텍스트 색상은 블랙/화이트만 사용 가능합니다.
+              폰트는 브랜드 일관성을 위해 <span style={{ fontWeight: 700 }}>Cabinet Grotesk</span>로 고정됩니다. 텍스트 색상은 그래픽 컬러(전역 컬러)를 따릅니다.
             </p>
           </div>
         </div>

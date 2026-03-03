@@ -48,7 +48,7 @@ export interface GraphicDef {
   defaultHeight?: number;
   /** Search keywords for filtering */
   keywords?: string[];
-  /** Logo flag — logos use brand-restricted colors only */
+  /** Logo flag — logos use same global themeColor as graphics */
   isLogo?: boolean;
 }
 
@@ -88,12 +88,9 @@ export const GRAPHICS: GraphicDef[] = [
   { name: '시계(시간)', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgClock, defaultWidth: 120, defaultHeight: 120, keywords: ['시계', '시간', '알람', '타이머', 'clock', 'time', 'alarm'] },
 ];
 
-// ── Logo 에셋 (브랜드 컬러 3종 전용, 그래픽 컬러 통일 로직에서 제외) ──
+// ── Logo 에셋 (그래픽과 동일하게 전역 themeColor 적용) ──
 export const BRAND_LOGOS: GraphicDef[] = [
   { name: 'LIKELION', category: '로고', viewBox: '0 0 100 100', path: '', imageUrl: imgLogoLikelion, defaultWidth: 300, defaultHeight: 60, keywords: ['멋사', 'likelion', '로고', '영문'], isLogo: true },
   { name: '멋사대학', category: '로고', viewBox: '0 0 100 100', path: '', imageUrl: imgLogoUniv, defaultWidth: 280, defaultHeight: 80, keywords: ['대학', '멋사대학', '로고', '한글'], isLogo: true },
   { name: '멋쟁이사자처럼', category: '로고', viewBox: '0 0 100 100', path: '', imageUrl: imgLogoFull, defaultWidth: 320, defaultHeight: 60, keywords: ['멋쟁이사자처럼', '풀네임', '로고', '한글'], isLogo: true },
 ];
-
-/** Brand-restricted colors for logos only */
-export const LOGO_COLORS = ['#FF6000', '#1C1C1C', '#F9F9F9'] as const;

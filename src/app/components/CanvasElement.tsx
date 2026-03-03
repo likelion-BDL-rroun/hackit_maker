@@ -159,7 +159,7 @@ export const CanvasElement = ({ element, themeColor, isSelected, onSelect }: Can
             fontFamily: "'Cabinet Grotesk', sans-serif",
             fontSize: `${element.style?.fontSize || 16}px`,
             fontWeight: element.style?.fontWeight || 400,
-            color: element.style?.color || '#000000',
+            color: themeColor,
             textAlign: (element.style?.textAlign as any) || 'left',
             lineHeight: element.style?.lineHeight ?? 1.3,
             letterSpacing: element.style?.letterSpacing ? `${element.style.letterSpacing}px` : undefined,
@@ -213,7 +213,7 @@ export const CanvasElement = ({ element, themeColor, isSelected, onSelect }: Can
             <div
               className="w-full h-full"
               style={{
-                backgroundColor: element.isLogo ? (element.style?.color || '#FF6000') : themeColor,
+                backgroundColor: themeColor,
                 WebkitMaskImage: `url(${element.imageUrl})`,
                 WebkitMaskSize: 'contain',
                 WebkitMaskRepeat: 'no-repeat',
@@ -226,7 +226,7 @@ export const CanvasElement = ({ element, themeColor, isSelected, onSelect }: Can
             />
           ) : (
             <svg viewBox="0 0 100 100" className="w-full h-full block" preserveAspectRatio="xMidYMid meet">
-              <path d={element.content} fill={element.isLogo ? (element.style?.color || '#FF6000') : themeColor} />
+              <path d={element.content} fill={themeColor} />
             </svg>
           )}
         </div>

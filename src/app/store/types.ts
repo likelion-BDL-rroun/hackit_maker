@@ -25,7 +25,7 @@ export interface EditorElement {
   graphicName?: string;
   /** For PNG/raster graphics — stores the image URL for mask-based recoloring */
   imageUrl?: string;
-  /** Logo flag — logos use brand-restricted colors, excluded from themeColor sync */
+  /** Logo flag — logos use same global themeColor as graphics */
   isLogo?: boolean;
   style?: {
     fontSize?: number;

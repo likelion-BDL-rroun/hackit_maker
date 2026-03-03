@@ -8,7 +8,13 @@ import {
 import { cn } from '../../lib/utils';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { LOGO_COLORS } from '../store/graphics';
+
+// Same presets as SidebarContent — single global color for graphics, logos, text
+const PRESET_COLORS = [
+  '#FFFFFF', '#FF6000', '#FF3B30', '#FF9500', '#FFCC00', '#34C759',
+  '#00C7BE', '#30B0C7', '#007AFF', '#5856D6', '#AF52DE',
+  '#FF2D55', '#1D1D1F', '#636366', '#8E8E93',
+];
 
 // ─── Reusable: Inline editable font size input ───
 const FontSizeInput = ({
@@ -166,28 +172,15 @@ const FONT_WEIGHTS = [
 // ═══════════════════════════════════════════════════════
 const MobileGraphicToolbar = () => {
   const {
-    selectedIds, elements, updateElement, removeElements, duplicateElement,
-    bringToFront, sendToBack, toggleElementLock,
+    selectedIds, elements, themeColor, setThemeColor,
+    removeElements, duplicateElement, bringToFront, sendToBack, toggleElementLock,
   } = useEditorStore();
   const selectedId = selectedIds[0];
   const element = elements.find(el => el.id === selectedId);
   if (!element) return null;
 
   const isLocked = element.locked;
-  const isLogo = element.isLogo;
-  const currentColor = element.style?.color;
-
-  const updateStyle = (key: string, value: any) => {
-    updateElement(selectedId, { style: { ...element.style, [key]: value } });
-  };
-
-  const colorOptions = isLogo
-    ? LOGO_COLORS.map(c => ({ color: c, border: c === '#F9F9F9' }))
-    : [
-        { color: '#000000', border: false },
-        { color: '#FFFFFF', border: true },
-        { color: '#FF6000', border: false },
-      ];
+  const colorOptions = PRESET_COLORS.map(c => ({ color: c, border: c.toUpperCase() === '#FFFFFF' }));
 
   return (
     <div
@@ -195,7 +188,7 @@ const MobileGraphicToolbar = () => {
       style={{ animation: 'fadeIn 0.15s ease-out', maxWidth: '340px' }}
     >
       {colorOptions.map(({ color, border: b }) => (
-        <ColorChip key={color} color={color} active={currentColor === color} onClick={() => updateStyle('color', color)} border={b} />
+        <ColorChip key={color} color={color} active={themeColor.toUpperCase() === color.toUpperCase()} onClick={() => setThemeColor(color)} border={b} />
       ))}
       <div className="w-px h-7 bg-gray-200 mx-0.5" />
       <MobileBtn icon={Copy} label="복제" onClick={() => duplicateElement(selectedId)} />
@@ -229,7 +222,7 @@ const TextDetailCard = ({
   feature: TextMenuFeature;
   onClose: () => void;
 }) => {
-  const { selectedIds, elements, updateElement } = useEditorStore();
+  const { selectedIds, elements, themeColor, setThemeColor, updateElement } = useEditorStore();
   const selectedId = selectedIds[0];
   const element = elements.find(el => el.id === selectedId);
   if (!element || element.type !== 'text') return null;
@@ -241,7 +234,6 @@ const TextDetailCard = ({
   const fontSize = element.style?.fontSize || 16;
   const fontWeight = element.style?.fontWeight || 400;
   const textAlign = element.style?.textAlign || 'left';
-  const currentColor = element.style?.color || '#000000';
 
   return (
     <div
@@ -303,32 +295,28 @@ const TextDetailCard = ({
         </div>
       )}
 
-      {/* Color: only #000000 and #FFFFFF */}
+      {/* Color: global theme color (graphics, logos, text) */}
       {feature === 'color' && (
-        <div className="flex gap-3 justify-center">
-          {[
-            { color: '#000000', label: '블랙', border: false },
-            { color: '#FFFFFF', label: '화이트', border: true },
-          ].map(({ color, label, border: b }) => (
-            <button
-              key={color}
-              onClick={() => updateStyle('color', color)}
-              className={cn(
-                "flex items-center gap-3 px-5 py-3 rounded-[14px] transition-all cursor-pointer border-2",
-                currentColor === color
-                  ? "border-[#FF6000] bg-orange-50"
-                  : "border-gray-200 bg-white active:bg-gray-50"
-              )}
-            >
-              <div
-                className={cn("w-8 h-8 rounded-full", b && "border border-gray-300")}
-                style={{ backgroundColor: color }}
+        <div className="flex gap-2 flex-wrap justify-center">
+          {PRESET_COLORS.map((color) => {
+            const isWhite = color.toUpperCase() === '#FFFFFF';
+            const isActive = themeColor.toUpperCase() === color.toUpperCase();
+            return (
+              <button
+                key={color}
+                onClick={() => setThemeColor(color)}
+                className={cn(
+                  "w-8 h-8 rounded-full transition-all cursor-pointer flex-shrink-0",
+                  isActive && "scale-110 ring-2 ring-[#FF6000]"
+                )}
+                style={{
+                  backgroundColor: color,
+                  boxShadow: isWhite ? 'inset 0 0 0 1px #E5E7EB' : undefined,
+                }}
+                title={color}
               />
-              <span style={{ fontSize: '14px', fontWeight: 600 }} className={currentColor === color ? "text-[#FF6000]" : "text-gray-700"}>
-                {label}
-              </span>
-            </button>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -515,7 +503,7 @@ const MobileTextToolbar = () => {
 // ═══════════════════════════════════════════════════════
 const DesktopToolbar = () => {
   const {
-    selectedIds, elements, updateElement, removeElements, duplicateElement,
+    selectedIds, elements, themeColor, setThemeColor, updateElement, removeElements, duplicateElement,
     bringToFront, sendToBack,
   } = useEditorStore();
 
@@ -586,23 +574,23 @@ const DesktopToolbar = () => {
             ))}
           </div>
 
-          {/* Text Color */}
+          {/* Text Color (global theme — applies to graphics, logos, text) */}
           <div className="flex items-center border-r border-gray-200 pr-1.5 mr-0.5 gap-0.5">
             <button
-              onClick={() => updateStyle('color', '#000000')}
+              onClick={() => setThemeColor('#000000')}
               className={cn(
                 "w-7 h-7 flex items-center justify-center rounded-[6px] cursor-pointer transition-colors border",
-                element.style?.color === '#000000' ? "border-[#FF6000] bg-orange-50" : "border-gray-200 hover:bg-gray-50"
+                themeColor.toUpperCase() === '#000000' ? "border-[#FF6000] bg-orange-50" : "border-gray-200 hover:bg-gray-50"
               )}
               title="블랙"
             >
               <div className="w-4 h-4 rounded-full bg-black" />
             </button>
             <button
-              onClick={() => updateStyle('color', '#FFFFFF')}
+              onClick={() => setThemeColor('#FFFFFF')}
               className={cn(
                 "w-7 h-7 flex items-center justify-center rounded-[6px] cursor-pointer transition-colors border",
-                element.style?.color === '#FFFFFF' ? "border-[#FF6000] bg-orange-50" : "border-gray-200 hover:bg-gray-50"
+                themeColor.toUpperCase() === '#FFFFFF' ? "border-[#FF6000] bg-orange-50" : "border-gray-200 hover:bg-gray-50"
               )}
               title="화이트"
             >
