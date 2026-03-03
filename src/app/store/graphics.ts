@@ -1,34 +1,34 @@
-// Batch 1 — 기존 PNG 에셋
-import imgExclamation from '../../assets/6887a4ecc946bd8402871ea1b6ba5ae792b87778.png';
-import imgQuestion from '../../assets/3203d1953fdf20274dd80c2255398d4089d43f80.png';
-import imgEsc from '../../assets/6cc818526c54e58e709b9528897285d29048eea2.png';
-import imgSmile from '../../assets/1a8f2d69ccf2af198284f77b37206f4a09342acd.png';
-import imgDeadline from '../../assets/114982979533017780dc543896fc19462666d8c5.png';
-import imgLightning from '../../assets/eac9e160e0b61b62704ab42572ac2e5636313829.png';
-import imgEyes from '../../assets/b193963b11dd20b6a34e2061b6567f865c6ea0b0.png';
-import imgHorse from '../../assets/9dc8ad7614b800818cdfefe02806d0a7ab184cda.png';
-import imgEnter from '../../assets/7fefe70d856aae0e0c7c99adfd18dc8294db852d.png';
-import imgCalendar from '../../assets/b58b601554026741e2d78d92a16324edb73dcf06.png';
-
-// Batch 2 — 추가 PNG 에셋
-import imgPaw from '../../assets/8e9914bca6513157d18187e7e664d5b9322abbcd.png';
-import imgTape from '../../assets/cc9444e6bdf9706291df8008272a8b0a0e3ef39d.png';
-import imgClip from '../../assets/742b78fa9f3cb16a08130bcc56bfb85517366712.png';
-import imgCrown from '../../assets/4d280c10116f0579b32a949c9df6d1b4cef9515c.png';
-import imgRocket from '../../assets/ab98d515ac1df3ae37c64383495e8c44b76d61de.png';
-import imgMoney from '../../assets/0d0979ad04cee544b145627330e7e3f4dd4f4f3a.png';
-import imgFire from '../../assets/c9e53ead2fa03978f91b509a05e831a2b5838f45.png';
-import imgLogo from '../../assets/0b05cf6952afaee0988876e29134c44421e09b80.png';
-import imgCoffee from '../../assets/3755c2b48eaa9b75304da690e12ccd751edb0fb6.png';
-import imgCursor from '../../assets/e6b026026c1be12c461723cfcbff91d026d97d22.png';
-
-// Batch 3 — 추가 PNG 에셋
-import imgBulb from '../../assets/18df144984c80f94090626ccedf877fa4666717c.png';
-import imgError from '../../assets/32cf3b62bc609c6ad729a19744ceb881f2df1a09.png';
-import imgDanger from '../../assets/ca5ab975c2ec720f70e5d258a64d8005d7e1ed27.png';
-import imgTerminal from '../../assets/92660a1e74100ae2003c033fc38b0ea7fd734f6d.png';
-import imgComputer from '../../assets/4718a4ce87ca7af4a7f3e96c9e9ee4c4888a5e83.png';
-import imgClock from '../../assets/e5aa203165082a1e65029afede8748c784b4542b.png';
+// New PNG graphic assets (exported from Figma, human-readable filenames under src/assets/new-graphics)
+import imgBulb from '../../assets/new-graphics/01_idea_bulb.png';
+import imgCoffee from '../../assets/new-graphics/02_coffee-awake.png';
+import imgSymbol from '../../assets/new-graphics/03_symbol.png';
+import imgCursor from '../../assets/new-graphics/04_cursor-direction.png';
+import imgCrown from '../../assets/new-graphics/05_crown.png';
+import imgMoney from '../../assets/new-graphics/06_cash-prize.png';
+import imgFire from '../../assets/new-graphics/07_explosion-passion.png';
+import imgPaw from '../../assets/new-graphics/08_paw-lion.png';
+import imgTape from '../../assets/new-graphics/09_tape-repair.png';
+import imgEyes from '../../assets/new-graphics/10_eyes-search.png';
+import imgQuestion from '../../assets/new-graphics/11_question-mark.png';
+import imgSmile from '../../assets/new-graphics/12_smile.png';
+import imgEsc from '../../assets/new-graphics/13_ESC.png';
+import imgRocket from '../../assets/new-graphics/14_rocket-launch.png';
+import imgClip from '../../assets/new-graphics/15_paperclip-attach.png';
+import imgComputer from '../../assets/new-graphics/16_computer-digital.png';
+import imgError from '../../assets/new-graphics/17_error.png';
+import imgDanger from '../../assets/new-graphics/18_danger.png';
+import imgEnter from '../../assets/new-graphics/19_enter-start.png';
+import imgHorse2026 from '../../assets/new-graphics/20_chess-strategy.png';
+import imgCalendar from '../../assets/new-graphics/21_calendar.png';
+import imgLightning from '../../assets/new-graphics/22_lightning-speed.png';
+import imgTerminal from '../../assets/new-graphics/23_terminal-coding.png';
+import imgClock from '../../assets/new-graphics/24_clock-time.png';
+import imgDeadline from '../../assets/new-graphics/25_bomb-deadline.png';
+import imgExclamation from '../../assets/new-graphics/26_exclamation-mark.png';
+import imgChat from '../../assets/new-graphics/27_speech-bubble.png';
+import imgPizza from '../../assets/new-graphics/28_pizza-food.png';
+import imgUfo from '../../assets/new-graphics/29_UFO.png';
+import imgGhost from '../../assets/new-graphics/30_ghost.png';
 
 // Logos
 import imgLogoLikelion from '../../assets/c5914f048948c4d542e04d194615de5ffe5cbbb2.png';
@@ -55,37 +55,38 @@ export interface GraphicDef {
 export const GRAPHIC_CATEGORIES = ['심볼'];
 
 export const GRAPHICS: GraphicDef[] = [
-  // ── Batch 1 PNG 그래픽 에셋 ──
-  { name: '느낌표', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgExclamation, defaultWidth: 120, defaultHeight: 120, keywords: ['느낌표', '느낌', '강조', 'exclamation'] },
-  { name: 'ESC', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgEsc, defaultWidth: 120, defaultHeight: 120, keywords: ['ESC', 'esc', '이스케이프', '키보드', '탈출', 'escape'] },
-  { name: '물음표', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgQuestion, defaultWidth: 120, defaultHeight: 120, keywords: ['물음표', '물음', '질문', 'question'] },
-  { name: '번개(속도)', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgLightning, defaultWidth: 120, defaultHeight: 120, keywords: ['번개', '속도', '전기', '빠름', 'lightning', 'speed'] },
-  { name: '마감', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgDeadline, defaultWidth: 120, defaultHeight: 120, keywords: ['마감', '폭탄', '데드라인', '급함', 'deadline', 'bomb'] },
-  { name: '스마일', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgSmile, defaultWidth: 120, defaultHeight: 120, keywords: ['스마일', '웃음', '이모지', '웃는', 'smile', 'happy'] },
-  { name: '캘린더', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgCalendar, defaultWidth: 120, defaultHeight: 120, keywords: ['캘린더', '달력', '일정', '날짜', 'calendar', 'date'] },
-  { name: '말(2026년)', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgHorse, defaultWidth: 120, defaultHeight: 120, keywords: ['말', '2026년', '2026', '띠', '말띠', 'horse'] },
-  { name: '엔터(시작)', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgEnter, defaultWidth: 120, defaultHeight: 120, keywords: ['엔터', '시작', '엔터키', '출발', 'enter', 'start'] },
-  { name: '눈동자(서치)', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgEyes, defaultWidth: 120, defaultHeight: 120, keywords: ['눈동자', '서치', '눈', '검색', '찾기', 'eyes', 'search'] },
-
-  // ── Batch 2 PNG 그래픽 에셋 ──
-  { name: '사자발(멋사)', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgPaw, defaultWidth: 120, defaultHeight: 120, keywords: ['사자발', '멋사', '멋쟁이사자처럼', '사자', '발', 'paw', 'likelion'] },
-  { name: '테이프(수리/복구/수정)', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgTape, defaultWidth: 120, defaultHeight: 120, keywords: ['테이프', '수리', '복구', '수정', '붙이기', 'tape', 'fix', 'repair'] },
-  { name: '클립(첨부)', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgClip, defaultWidth: 120, defaultHeight: 120, keywords: ['클립', '첨부', '첨부파일', '클립보드', 'clip', 'attach'] },
-  { name: '왕관(우승)', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgCrown, defaultWidth: 120, defaultHeight: 120, keywords: ['왕관', '우승', '왕', '크라운', '1등', 'crown', 'winner'] },
-  { name: '로켓(스타트업/부스터)', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgRocket, defaultWidth: 120, defaultHeight: 120, keywords: ['로켓', '스타트업', '부스터', '발사', '성장', 'rocket', 'startup', 'booster'] },
-  { name: '돈(상금)', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgMoney, defaultWidth: 120, defaultHeight: 120, keywords: ['돈', '상금', '머니', '현금', '지폐', '보상', 'money', 'cash', 'prize'] },
-  { name: '불(열정/버닝)', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgFire, defaultWidth: 120, defaultHeight: 120, keywords: ['불', '열정', '버닝', '화재', '불꽃', 'fire', 'burning', 'passion'] },
-  { name: '로고', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgLogo, defaultWidth: 120, defaultHeight: 120, keywords: ['로고', '브랜드', 'logo', 'brand'] },
-  { name: '커피(각성)', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgCoffee, defaultWidth: 120, defaultHeight: 120, keywords: ['커피', '각성', '카페인', '컵', '음료', 'coffee', 'caffeine', 'awake'] },
-  { name: '커서', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgCursor, defaultWidth: 120, defaultHeight: 120, keywords: ['커서', '마우스', '클릭', '포인터', 'cursor', 'pointer', 'click'] },
-
-  // ── Batch 3 PNG 그래픽 에셋 ──
-  { name: '전구(아이디어)', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgBulb, defaultWidth: 120, defaultHeight: 120, keywords: ['전구', '아이디어', '생각', '발상', 'idea', 'bulb', 'lightbulb'] },
-  { name: '에러', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgError, defaultWidth: 120, defaultHeight: 120, keywords: ['에러', '오류', '경고', '에러페이지', 'error', 'bug'] },
-  { name: '위험', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgDanger, defaultWidth: 120, defaultHeight: 120, keywords: ['위험', '주의', '경고', '위험표시', 'danger', 'warning', 'alert'] },
-  { name: '터미널(코딩)', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgTerminal, defaultWidth: 120, defaultHeight: 120, keywords: ['터미널', '코딩', '코드', '개발', '프로그래밍', 'terminal', 'coding', 'code'] },
-  { name: '컴퓨터(디지털)', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgComputer, defaultWidth: 120, defaultHeight: 120, keywords: ['컴퓨터', '디지털', '모니터', 'PC', '기술', 'computer', 'digital', 'tech'] },
-  { name: '시계(시간)', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgClock, defaultWidth: 120, defaultHeight: 120, keywords: ['시계', '시간', '알람', '타이머', 'clock', 'time', 'alarm'] },
+  // 새 PNG 그래픽 에셋 (src/assets/new-graphics 기준, 파일 이름/의미 기반 검색어)
+  { name: '01_idea_bulb', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgBulb, defaultWidth: 120, defaultHeight: 120, keywords: ['전구', '아이디어', '아이디어전구', '생각', '발상', 'idea', 'bulb', 'lightbulb'] },
+  { name: '02_coffee-awake', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgCoffee, defaultWidth: 120, defaultHeight: 120, keywords: ['커피', '각성', '카페인', '밤샘', '야근', 'coffee', 'caffeine', 'awake'] },
+  { name: '03_symbol', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgSymbol, defaultWidth: 120, defaultHeight: 120, keywords: ['심볼', '아이콘', 'symbol'] },
+  { name: '04_cursor-direction', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgCursor, defaultWidth: 120, defaultHeight: 120, keywords: ['커서', '마우스', '클릭', '포인터', '방향', 'cursor', 'pointer'] },
+  { name: '05_crown', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgCrown, defaultWidth: 120, defaultHeight: 120, keywords: ['왕관', '우승', '1등', '왕', '크라운', 'crown', 'winner'] },
+  { name: '06_cash-prize', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgMoney, defaultWidth: 120, defaultHeight: 120, keywords: ['돈', '상금', '머니', '현금', '지폐', '보상', '시상', 'money', 'cash', 'prize'] },
+  // 불(열정/버닝) — 불, 열정, 버닝 중 아무거나 검색해도 나오도록
+  { name: '07_explosion-passion', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgFire, defaultWidth: 120, defaultHeight: 120, keywords: ['불', '열정', '버닝', '불꽃', '화염', 'fire', 'burning', 'passion'] },
+  { name: '08_paw-lion', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgPaw, defaultWidth: 120, defaultHeight: 120, keywords: ['사자발', '멋사', '멋쟁이사자처럼', '사자', '발바닥', 'paw', 'likelion'] },
+  { name: '09_tape-repair', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgTape, defaultWidth: 120, defaultHeight: 120, keywords: ['테이프', '수리', '복구', '수정', '붙이기', 'tape', 'fix', 'repair'] },
+  { name: '10_eyes-search', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgEyes, defaultWidth: 120, defaultHeight: 120, keywords: ['눈동자', '눈', '서치', '검색', '찾기', 'eyes', 'search'] },
+  { name: '11_question-mark', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgQuestion, defaultWidth: 120, defaultHeight: 120, keywords: ['물음표', '물음', '질문', '궁금', 'question', 'why'] },
+  { name: '12_smile', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgSmile, defaultWidth: 120, defaultHeight: 120, keywords: ['스마일', '웃음', '이모지', '웃는', 'happy', 'smile'] },
+  { name: '13_ESC', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgEsc, defaultWidth: 120, defaultHeight: 120, keywords: ['ESC', 'esc', '이스케이프', '키보드', '탈출', 'escape', '취소'] },
+  { name: '14_rocket-launch', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgRocket, defaultWidth: 120, defaultHeight: 120, keywords: ['로켓', '스타트업', '부스터', '발사', '성장', 'rocket', 'startup', 'booster'] },
+  { name: '15_paperclip-attach', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgClip, defaultWidth: 120, defaultHeight: 120, keywords: ['클립', '첨부', '첨부파일', '집게', 'clip', 'attach'] },
+  { name: '16_computer-digital', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgComputer, defaultWidth: 120, defaultHeight: 120, keywords: ['컴퓨터', '디지털', '모니터', 'PC', '기술', 'computer', 'digital', 'tech'] },
+  { name: '17_error', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgError, defaultWidth: 120, defaultHeight: 120, keywords: ['에러', '오류', '경고', '에러페이지', 'error', 'bug'] },
+  { name: '18_danger', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgDanger, defaultWidth: 120, defaultHeight: 120, keywords: ['위험', '주의', '경고', '위험표시', 'danger', 'warning', 'alert'] },
+  { name: '19_enter-start', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgEnter, defaultWidth: 120, defaultHeight: 120, keywords: ['엔터', '시작', '엔터키', '출발', 'enter', 'start'] },
+  { name: '20_chess-strategy', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgHorse2026, defaultWidth: 120, defaultHeight: 120, keywords: ['말', '2026년', '2026', '띠', '말띠', 'horse', 'chess', 'strategy'] },
+  { name: '21_calendar', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgCalendar, defaultWidth: 120, defaultHeight: 120, keywords: ['캘린더', '달력', '일정', '날짜', 'calendar', 'date'] },
+  { name: '22_lightning-speed', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgLightning, defaultWidth: 120, defaultHeight: 120, keywords: ['번개', '속도', '전기', '빠름', 'lightning', 'speed'] },
+  { name: '23_terminal-coding', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgTerminal, defaultWidth: 120, defaultHeight: 120, keywords: ['터미널', '코딩', '코드', '개발', '프로그래밍', 'terminal', 'coding', 'code'] },
+  { name: '24_clock-time', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgClock, defaultWidth: 120, defaultHeight: 120, keywords: ['시계', '시간', '알람', '타이머', 'clock', 'time', 'alarm'] },
+  { name: '25_bomb-deadline', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgDeadline, defaultWidth: 120, defaultHeight: 120, keywords: ['마감', '데드라인', '급함', '폭탄', 'bomb', 'deadline'] },
+  { name: '26_exclamation-mark', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgExclamation, defaultWidth: 120, defaultHeight: 120, keywords: ['느낌표', '느낌', '강조', '느낌표아이콘', 'exclamation', 'important'] },
+  { name: '27_speech-bubble', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgChat, defaultWidth: 120, defaultHeight: 120, keywords: ['말풍선', '대화', '채팅', '메시지', 'speech', 'chat'] },
+  { name: '28_pizza-food', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgPizza, defaultWidth: 120, defaultHeight: 120, keywords: ['피자', '식사', '야식', '간식', '치즈', 'pizza', 'snack'] },
+  { name: '29_UFO', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgUfo, defaultWidth: 120, defaultHeight: 120, keywords: ['UFO', '외계인', '미지', '특이', 'ufo', 'alien'] },
+  { name: '30_ghost', category: '심볼', viewBox: '0 0 100 100', path: '', imageUrl: imgGhost, defaultWidth: 120, defaultHeight: 120, keywords: ['유령', '고스트', '버그', '미스터리', 'ghost', 'spooky'] },
 ];
 
 // ── Logo 에셋 (그래픽과 동일하게 전역 themeColor 적용) ──
