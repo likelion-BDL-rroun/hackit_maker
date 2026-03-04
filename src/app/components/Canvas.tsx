@@ -230,12 +230,25 @@ export const Canvas = () => {
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-    // Safari fires gesturestart for pinch — block it entirely
-    const blockGesture = (e: Event) => e.preventDefault();
-    // Block multi-touch move to prevent any accidental browser zoom
-    const blockMultiTouch = (e: TouchEvent) => {
-      if (e.touches.length > 1) e.preventDefault();
+
+    /*
+     * gesturestart/gesturechange: Moveable 조작 중에는 블록하지 않음.
+     * isDragging 중 preventDefault하면 Moveable 내부 이벤트 체인이 끊겨
+     * 제스처가 불완전하게 종료되며 상태가 잠길 수 있음.
+     * 단, 아무것도 조작하지 않을 때(idle)에만 pinch-zoom 차단.
+     */
+    const blockGesture = (e: Event) => {
+      const store = (window as any).__editorInteracting;
+      if (!store) e.preventDefault();
     };
+
+    // 멀티터치 스크롤/줌 차단 — Moveable 조작 중이 아닐 때만
+    const blockMultiTouch = (e: TouchEvent) => {
+      if (e.touches.length > 1 && !(window as any).__editorInteracting) {
+        e.preventDefault();
+      }
+    };
+
     container.addEventListener('gesturestart', blockGesture, { passive: false } as any);
     container.addEventListener('gesturechange', blockGesture, { passive: false } as any);
     container.addEventListener('touchmove', blockMultiTouch, { passive: false });
@@ -461,9 +474,14 @@ export const Canvas = () => {
         isDragging ? "overflow-hidden" : "overflow-auto"
       )}
       style={{
-        /* pan-x pan-y: allow scroll but block browser pinch-zoom;
-           none: lock everything during active handle drag */
-        touchAction: isDragging ? 'none' : 'pan-x pan-y',
+        /*
+         * 엘리먼트가 선택된 상태(핸들 표시 중)에서는 touchAction을 'none'으로 유지.
+         * 이유: iOS Safari는 touchAction:'pan-x pan-y' 상태에서 터치가 시작되면
+         * 즉시 스크롤 제스처로 commit하기 때문에, Moveable의 onResizeStart에서
+         * isDragging을 true로 바꿔도 이미 늦어서 탭 크래시가 발생함.
+         * 핸들이 노출될 수 있는 모든 상황(선택 중 or 드래그 중)에서 'none' 적용.
+         */
+        touchAction: (isDragging || selectedIds.length > 0) ? 'none' : 'pan-x pan-y',
         overscrollBehavior: 'contain',
       }}
       onClick={(e) => {
@@ -621,6 +639,7 @@ export const Canvas = () => {
                     set([el.x, el.y]);
                     pushHistory();
                   }
+                  (window as any).__editorInteracting = true;
                   setIsDragging(true);
                   setInteractionMode('object_transforming');
                 }}
@@ -634,6 +653,7 @@ export const Canvas = () => {
                     const [x, y] = lastEvent.beforeTranslate;
                     updateElement(selectedIds[0], { x, y });
                   }
+                  (window as any).__editorInteracting = false;
                   setIsDragging(false);
                   setInteractionMode('object_selected');
                 }}
@@ -644,6 +664,7 @@ export const Canvas = () => {
                     dragStart && dragStart.set([el.x, el.y]);
                     pushHistory();
                   }
+                  (window as any).__editorInteracting = true;
                   setIsDragging(true);
                   setInteractionMode('object_transforming');
 
@@ -667,7 +688,8 @@ export const Canvas = () => {
 
                   // Live-preview font size scaling for text
                   if (resizeInitRef.current && t) {
-                    const ratio = w / resizeInitRef.current.width;
+                    // Math.max(1, ...) : width가 0일 때 Infinity 방지
+                    const ratio = w / Math.max(1, resizeInitRef.current.width);
                     const newFontSize = Math.max(8, Math.round(resizeInitRef.current.fontSize * ratio));
                     const textChild = (t as HTMLElement).querySelector('[contenteditable], [style*="font-size"]') as HTMLElement;
                     if (textChild) {
@@ -681,7 +703,7 @@ export const Canvas = () => {
                     const [x, y] = drag.beforeTranslate;
                     if (resizeInitRef.current) {
                       // Text element: compute final font size from ratio
-                      const ratio = w / resizeInitRef.current.width;
+                      const ratio = w / Math.max(1, resizeInitRef.current.width);
                       const newFontSize = Math.max(8, Math.round(resizeInitRef.current.fontSize * ratio));
                       updateElement(selectedIds[0], {
                         x, y,
@@ -692,6 +714,7 @@ export const Canvas = () => {
                       updateElement(selectedIds[0], { width: w, height: h, x, y });
                     }
                   }
+                  (window as any).__editorInteracting = false;
                   setIsDragging(false);
                   setInteractionMode('object_selected');
                 }}
@@ -701,6 +724,7 @@ export const Canvas = () => {
                     set(el.rotation);
                     pushHistory();
                   }
+                  (window as any).__editorInteracting = true;
                   setIsDragging(true);
                   setInteractionMode('object_transforming');
                 }}
@@ -728,6 +752,7 @@ export const Canvas = () => {
                     const { angle } = applyRotationSnap(lastEvent.beforeRotate);
                     updateElement(selectedIds[0], { rotation: angle });
                   }
+                  (window as any).__editorInteracting = false;
                   setIsDragging(false);
                   setInteractionMode('object_selected');
                   setIsSnapping(false);
