@@ -11,66 +11,28 @@ function App() {
           from { opacity: 0; transform: translateY(-4px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        /* ─── Moveable: 색상만 여기서 관리 (크기는 Canvas.tsx에서 scale 보정) ─── */
         .moveable-line {
           background: #FF6000 !important;
         }
+        /* 리사이즈 핸들: 흰색 fill */
         .moveable-control {
+          background: #ffffff !important;
+        }
+        /* 회전 핸들: .moveable-control을 상속하므로 명시적으로 orange 유지 */
+        .moveable-rotation-control {
           background: #FF6000 !important;
-          border: 2px solid white !important;
         }
         .moveable-dashed {
           border-color: #FF6000 !important;
         }
-        /* ─── Touch-friendly Moveable handles ─── */
-        /* Enlarge all control handles on touch devices for easier grabbing */
-        @media (pointer: coarse) {
-          .moveable-control {
-            width: 16px !important;
-            height: 16px !important;
-            margin-top: -8px !important;
-            margin-left: -8px !important;
-            border-radius: 50% !important;
-            /* Invisible expanded touch target via pseudo-element */
-          }
-          .moveable-control::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 44px;
-            height: 44px;
-            transform: translate(-50%, -50%);
-          }
-          /* Rotation handle: bigger hit area */
-          .moveable-rotation-control {
-            width: 18px !important;
-            height: 18px !important;
-            margin-top: -9px !important;
-            margin-left: -9px !important;
-          }
-          .moveable-rotation-control::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 48px;
-            height: 48px;
-            transform: translate(-50%, -50%);
-          }
-          /* Prevent moveable control-box from being clipped */
-          .moveable-control-box {
-            overflow: visible !important;
-          }
+        /* 중앙 원점 핸들: 기능 유지, 시각적으로만 숨김 */
+        .moveable-origin {
+          opacity: 0 !important;
+          pointer-events: none !important;
         }
-        /* Even on desktop, ensure rotation handle is comfortably sized */
-        .moveable-rotation-control::before {
-          content: '';
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 40px;
-          height: 40px;
-          transform: translate(-50%, -50%);
+        .moveable-control-box {
+          overflow: visible !important;
         }
       `}</style>
       <EditorLayout />

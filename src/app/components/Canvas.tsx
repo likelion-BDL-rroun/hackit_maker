@@ -264,6 +264,103 @@ export const Canvas = () => {
   const isGraphic = selectedElement?.type === 'graphic';
   const isText = selectedElement?.type === 'text';
 
+  // ─── Scale-invariant Moveable handle styles ───
+  // 캔버스는 CSS transform:scale로 축소/확대되므로 Moveable 핸들도 함께 축소됨.
+  // scale의 역수를 곱해 항상 동일한 화면 픽셀 크기를 유지하도록 보정한다.
+  const moveableScaleStyle = useMemo(() => {
+    const s = Math.max(0.05, scale);
+
+    // 화면에서 보이길 원하는 실제 픽셀 크기
+    const LINE        = 1;    // 선택 외곽선 두께 (px)
+    const HANDLE      = 8;    // 리사이즈 핸들 크기 (px) — 정사각형
+    const HANDLE_STK  = 0.5;  // 리사이즈 핸들 orange 스트로크 (px)
+    const ROT         = 10;   // 회전 핸들 지름 (px) — 원형
+    const ROT_BDR     = 1.5;  // 회전 핸들 흰색 테두리 (px)
+    const TOUCH_H     = 10;   // 터치 모드 리사이즈 핸들 (px)
+    const TOUCH_ROT   = 12;   // 터치 모드 회전 핸들 (px)
+    const TOUCH_HIT   = 44;   // 터치 히트 영역 (px)
+    const TOUCH_HIT_R = 52;   // 회전 핸들 터치 히트 영역 (px)
+
+    // 캔버스 좌표계에서의 크기 = 화면 픽셀 크기 / scale
+    const l   = LINE        / s;
+    const h   = HANDLE      / s;
+    const hs  = HANDLE_STK  / s;
+    const r   = ROT         / s;
+    const rb  = ROT_BDR     / s;
+    const th  = TOUCH_H     / s;
+    const tr  = TOUCH_ROT   / s;
+    const tt  = TOUCH_HIT   / s;
+    const ttr = TOUCH_HIT_R / s;
+
+    return `
+      /* ── 선택 외곽선: moveable-direction만 타겟 (회전 가이드선 제외) ── */
+      .moveable-line.moveable-direction {
+        height: ${l}px !important;
+      }
+
+      /* ── 회전 가이드선: 두께(width)만 보정, 길이(height)는 라이브러리가 설정 ── */
+      .moveable-rotation-line {
+        width: ${l}px !important;
+      }
+
+      /* ── 리사이즈 핸들: 정사각형 / white fill / orange 0.5px 스트로크 ── */
+      .moveable-control {
+        width:         ${h}px !important;
+        height:        ${h}px !important;
+        margin-top:    ${-h / 2}px !important;
+        margin-left:   ${-h / 2}px !important;
+        border-radius: 0 !important;
+        border:        ${hs}px solid #FF6000 !important;
+        z-index: 1 !important;
+      }
+
+      /* ── 회전 핸들: 원형 / orange fill / white 테두리 / 클릭 우선권 ── */
+      .moveable-rotation-control {
+        width:         ${r}px !important;
+        height:        ${r}px !important;
+        margin-top:    ${-r / 2}px !important;
+        margin-left:   ${-r / 2}px !important;
+        border-radius: 50% !important;
+        border:        ${rb}px solid white !important;
+        z-index: 10 !important;
+      }
+
+      /* ── 투명 터치 히트 영역 확장 (모든 디바이스) ── */
+      .moveable-control::before {
+        content: '';
+        position: absolute;
+        top: 50%; left: 50%;
+        width:  ${tt}px;
+        height: ${tt}px;
+        transform: translate(-50%, -50%);
+      }
+      .moveable-rotation-control::before {
+        content: '';
+        position: absolute;
+        top: 50%; left: 50%;
+        width:  ${ttr}px;
+        height: ${ttr}px;
+        transform: translate(-50%, -50%);
+      }
+
+      /* ── 터치 디바이스: 핸들을 더 크게 ── */
+      @media (pointer: coarse) {
+        .moveable-control {
+          width:       ${th}px !important;
+          height:      ${th}px !important;
+          margin-top:  ${-th / 2}px !important;
+          margin-left: ${-th / 2}px !important;
+        }
+        .moveable-rotation-control {
+          width:       ${tr}px !important;
+          height:      ${tr}px !important;
+          margin-top:  ${-tr / 2}px !important;
+          margin-left: ${-tr / 2}px !important;
+        }
+      }
+    `;
+  }, [scale]);
+
   // Center-anchored programmatic zoom
   const zoomCentered = useCallback((newScale: number) => {
     const container = containerRef.current;
@@ -354,6 +451,9 @@ export const Canvas = () => {
   }, [printMargins, updateBadgePosition, scale, format]);
 
   return (
+    <>
+    {/* Scale-invariant Moveable handle overrides — 캔버스 축소 시에도 동일한 크기 유지 */}
+    <style>{moveableScaleStyle}</style>
     <div
       ref={containerRef}
       className={cn(
@@ -495,6 +595,7 @@ export const Canvas = () => {
                 draggable={true}
                 throttleDrag={0}
                 resizable={true}
+                renderDirections={["nw", "ne", "sw", "se"]}
                 keepRatio={isGraphic || isText}
                 throttleResize={0}
                 rotatable={true}
@@ -778,5 +879,6 @@ export const Canvas = () => {
         isMobile={isMobile}
       />
     </div>
+    </>
   );
 };
