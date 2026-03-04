@@ -705,14 +705,22 @@ export const Canvas = () => {
       {/* Context Toolbar - Floating — hide when editing text */}
       {selectedIds.length > 0 && selectedElement && interactionMode !== 'object_editing_text' && !isDragging && (
         isMobile ? (
-          <MobileToolbarPositioner
-            element={selectedElement}
-            scale={scale}
-            containerRef={containerRef}
-            canvasRef={canvasRef}
-          >
-            <ContextToolbar isMobile />
-          </MobileToolbarPositioner>
+          isGraphic ? (
+            // 그래픽 요소: PC와 동일하게 상단 고정 위치
+            <div className="fixed left-1/2 transform -translate-x-1/2 z-[200] top-[68px] max-w-[95vw]" style={{ pointerEvents: 'auto' }}>
+              <ContextToolbar isMobile />
+            </div>
+          ) : (
+            // 텍스트 요소: 기존 방식 유지 (요소 근처에 플로팅)
+            <MobileToolbarPositioner
+              element={selectedElement}
+              scale={scale}
+              containerRef={containerRef}
+              canvasRef={canvasRef}
+            >
+              <ContextToolbar isMobile />
+            </MobileToolbarPositioner>
+          )
         ) : (
           <div className="fixed left-1/2 transform -translate-x-1/2 z-[200] top-[68px] max-w-[95vw]" style={{ pointerEvents: 'auto' }}>
             <ContextToolbar />

@@ -2,8 +2,8 @@ import { useEditorStore } from '../store/useEditorStore';
 import {
   Trash2, Copy, AlignLeft, AlignCenter, AlignRight,
   ArrowUpToLine, ArrowDownToLine, MoreHorizontal,
-  Lock, Unlock, Bold, X, Minus, Plus, Type as TypeIcon,
-  Palette, ChevronDown,
+  Minus, Plus, Type as TypeIcon,
+  Palette,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -168,39 +168,40 @@ const FONT_WEIGHTS = [
 
 // ═══════════════════════════════════════════════════════
 // MOBILE GRAPHIC TOOLBAR
-// All actions directly exposed, flex-wrap 2 lines, no "…"
+// PC와 동일한 기능만: 복제, 삭제, 앞으로, 뒤로
 // ═══════════════════════════════════════════════════════
 const MobileGraphicToolbar = () => {
   const {
-    selectedIds, elements, themeColor, setThemeColor,
-    removeElements, duplicateElement, bringToFront, sendToBack, toggleElementLock,
+    selectedIds, elements,
+    removeElements, duplicateElement, bringToFront, sendToBack,
   } = useEditorStore();
   const selectedId = selectedIds[0];
   const element = elements.find(el => el.id === selectedId);
   if (!element) return null;
 
-  const isLocked = element.locked;
-  const colorOptions = PRESET_COLORS.map(c => ({ color: c, border: c.toUpperCase() === '#FFFFFF' }));
-
   return (
     <div
-      className="bg-white shadow-xl rounded-[14px] border border-gray-100 p-1.5 flex flex-wrap items-center justify-center gap-0.5"
-      style={{ animation: 'fadeIn 0.15s ease-out', maxWidth: '340px' }}
+      className="bg-white shadow-xl rounded-[12px] border border-gray-100 p-1.5 flex items-center gap-1"
+      style={{ animation: 'fadeIn 0.15s ease-out' }}
     >
-      {colorOptions.map(({ color, border: b }) => (
-        <ColorChip key={color} color={color} active={themeColor.toUpperCase() === color.toUpperCase()} onClick={() => setThemeColor(color)} border={b} />
-      ))}
-      <div className="w-px h-7 bg-gray-200 mx-0.5" />
-      <MobileBtn icon={Copy} label="복제" onClick={() => duplicateElement(selectedId)} />
-      <MobileBtn icon={Trash2} label="삭제" onClick={() => removeElements([selectedId])} danger />
-      <MobileBtn
-        icon={isLocked ? Lock : Unlock}
-        label={isLocked ? '잠금' : '해제'}
-        onClick={() => toggleElementLock(selectedId)}
-        active={isLocked}
-      />
-      <MobileBtn icon={ArrowUpToLine} label="앞으로" onClick={() => bringToFront(selectedId)} />
-      <MobileBtn icon={ArrowDownToLine} label="뒤로" onClick={() => sendToBack(selectedId)} />
+      {/* Layer order */}
+      <div className="flex items-center gap-0.5 border-r border-gray-200 pr-1.5 mr-0.5">
+        <button onClick={() => bringToFront(selectedId)} className="p-1.5 hover:bg-gray-100 active:bg-gray-100 rounded-[6px] text-gray-500 hover:text-gray-700 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center" title="맨 앞으로">
+          <ArrowUpToLine className="w-4 h-4" />
+        </button>
+        <button onClick={() => sendToBack(selectedId)} className="p-1.5 hover:bg-gray-100 active:bg-gray-100 rounded-[6px] text-gray-500 hover:text-gray-700 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center" title="맨 뒤로">
+          <ArrowDownToLine className="w-4 h-4" />
+        </button>
+      </div>
+      {/* Duplicate + Delete */}
+      <div className="flex items-center gap-0.5">
+        <button onClick={() => duplicateElement(selectedId)} className="p-1.5 hover:bg-gray-100 active:bg-gray-100 rounded-[6px] text-gray-500 hover:text-blue-600 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center" title="복제">
+          <Copy className="w-4 h-4" />
+        </button>
+        <button onClick={() => removeElements([selectedId])} className="p-1.5 hover:bg-red-50 active:bg-red-50 rounded-[6px] text-gray-500 hover:text-red-600 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center" title="삭제">
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </div>
     </div>
   );
 };
