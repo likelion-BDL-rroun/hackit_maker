@@ -3,7 +3,7 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  base: import.meta.env.VERCEL ? '/' : '/hackit_maker/',
+  base: '/',
   plugins: [
     react(),
     tailwindcss(),
