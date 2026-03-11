@@ -1,11 +1,10 @@
-import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useMemo, useImperativeHandle } from 'react';
 import Moveable from 'react-moveable';
 import { useEditorStore } from '../store/useEditorStore';
 import { FORMATS } from '../store/types';
 import { cn } from '../../lib/utils';
 import { CanvasElement } from './CanvasElement';
 import { ContextToolbar } from './ContextToolbar';
-import { ZoomControls } from './ZoomControls';
 import { MobileToolbarPositioner } from './MobileToolbarPositioner';
 
 // Print safe area margins
@@ -14,10 +13,21 @@ const A3_PRINT_MARGIN = 118;
 // Breathing room padding around artboard
 const CANVAS_PADDING = 40;
 
-// Mobile bottom tab bar height (approx)
-const MOBILE_BOTTOM_TAB_H = 64;
+// Mobile bottom bar height — kept for backward compat but new layout has no bottom tab
+const MOBILE_BOTTOM_TAB_H = 0;
 
-export const Canvas = () => {
+export interface CanvasHandle {
+  zoomIn: () => void;
+  zoomOut: () => void;
+  fitToScreen: () => void;
+  zoomTo100: () => void;
+}
+
+interface CanvasProps {
+  onExport?: () => void;
+}
+
+export const Canvas = React.forwardRef<CanvasHandle, CanvasProps>(({ onExport }, ref) => {
   const {
     selectedIds, elements, scale, setScale, format, backgroundColor, themeColor,
     showMargins, showPrintSafeArea, printPreviewMode, interactionMode,
@@ -419,6 +429,14 @@ export const Canvas = () => {
   const zoomOut = () => zoomCentered(Math.max(Math.round((scale - 0.1) * 100) / 100, 0.1));
   const zoomTo100 = () => zoomCentered(1);
 
+  // Expose zoom methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    zoomIn,
+    zoomOut,
+    fitToScreen,
+    zoomTo100,
+  }), [scale, zoomCentered, fitToScreen]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Scaled visual dimensions for the layout wrapper
   const scaledW = width * scale;
   const scaledH = height * scale;
@@ -470,7 +488,7 @@ export const Canvas = () => {
     <div
       ref={containerRef}
       className={cn(
-        "flex-1 bg-[#F5F5F7] relative select-none scrollbar-hidden",
+        "flex-1 bg-[#E8E8E8] relative select-none scrollbar-hidden",
         isDragging ? "overflow-hidden" : "overflow-auto"
       )}
       style={{
@@ -612,7 +630,7 @@ export const Canvas = () => {
                 target={target}
                 draggable={true}
                 throttleDrag={0}
-                resizable={true}
+                resizable={!selectedElement?.isLogo}
                 renderDirections={["nw", "ne", "sw", "se"]}
                 keepRatio={isGraphic || isText}
                 throttleResize={0}
@@ -833,7 +851,7 @@ export const Canvas = () => {
         isMobile ? (
           isGraphic ? (
             // 그래픽 요소: PC와 동일하게 상단 고정 위치
-            <div className="fixed left-1/2 transform -translate-x-1/2 z-[200] top-[68px] max-w-[95vw]" style={{ pointerEvents: 'auto' }}>
+            <div className="fixed left-1/2 transform -translate-x-1/2 z-[200] top-[16px] max-w-[95vw]" style={{ pointerEvents: 'auto' }}>
               <ContextToolbar isMobile />
             </div>
           ) : (
@@ -848,7 +866,7 @@ export const Canvas = () => {
             </MobileToolbarPositioner>
           )
         ) : (
-          <div className="fixed left-1/2 transform -translate-x-1/2 z-[200] top-[68px] max-w-[95vw]" style={{ pointerEvents: 'auto' }}>
+          <div className="fixed left-1/2 transform -translate-x-1/2 z-[200] top-[16px] max-w-[95vw]" style={{ pointerEvents: 'auto' }}>
             <ContextToolbar />
           </div>
         )
@@ -894,16 +912,7 @@ export const Canvas = () => {
         </div>
       )}
 
-      {/* Zoom Controls — positioned above bottom tabs on mobile */}
-      <ZoomControls
-        scale={scale}
-        onZoomIn={zoomIn}
-        onZoomOut={zoomOut}
-        onFit={fitToScreen}
-        onZoom100={zoomTo100}
-        isMobile={isMobile}
-      />
     </div>
     </>
   );
-};
+});

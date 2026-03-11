@@ -31,8 +31,6 @@ export const useEditorStore = create<EditorState>()(
         past: [],
         future: [],
       },
-      isSaving: false,
-      lastSaved: null,
 
       setTitle: (title) => set({ title }),
       setFormat: (format) => set({ format }),
@@ -217,6 +215,17 @@ export const useEditorStore = create<EditorState>()(
         set({ elements: newOrder });
       },
 
+      setAllElements: (newElements) => {
+        set((state) => ({
+          elements: newElements,
+          selectedIds: [],
+          history: {
+            past: [...state.history.past, makeSnapshot(state)].slice(-MAX_HISTORY),
+            future: [],
+          },
+        }));
+      },
+
       undo: () => {
         set((state) => {
           const previous = state.history.past[state.history.past.length - 1];
@@ -249,27 +258,6 @@ export const useEditorStore = create<EditorState>()(
         });
       },
 
-      save: () => {
-        set({ isSaving: true, lastSaved: Date.now() });
-        setTimeout(() => set({ isSaving: false }), 600);
-      },
-
-      load: () => {
-        // Handled by persist middleware
-      },
-
-      reset: () => {
-        if (window.confirm('모든 작업을 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
-          set({
-            title: 'Untitled',
-            elements: [],
-            selectedIds: [],
-            backgroundColor: '#FFFFFF',
-            history: { past: [], future: [] },
-            lastSaved: null,
-          });
-        }
-      },
     }),
     {
       name: 'poster-editor-storage',
@@ -279,7 +267,6 @@ export const useEditorStore = create<EditorState>()(
         backgroundColor: state.backgroundColor,
         format: state.format,
         title: state.title,
-        lastSaved: state.lastSaved,
       }),
     }
   )

@@ -63,9 +63,6 @@ export interface EditorState {
     past: HistorySnapshot[];
     future: HistorySnapshot[];
   };
-  isSaving: boolean;
-  lastSaved: number | null;
-
   // Actions
   setTitle: (title: string) => void;
   setFormat: (format: FormatType) => void;
@@ -95,11 +92,9 @@ export interface EditorState {
   moveUp: (id: string) => void;
   moveDown: (id: string) => void;
   reorderElements: (newOrder: EditorElement[]) => void;
+  setAllElements: (elements: EditorElement[]) => void;
 
   pushHistory: () => void;
   undo: () => void;
   redo: () => void;
-  save: () => void;
-  load: () => void;
-  reset: () => void;
 }
