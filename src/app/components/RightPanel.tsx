@@ -35,16 +35,15 @@ const ToggleSwitch = ({ enabled, onToggle }: { enabled: boolean; onToggle: () =>
 
 // ─── Card container ────────────────────────────────────────────────────────────
 const Card = ({
-  title, children, width, height,
+  title, children, width,
 }: {
   title: string;
   children: React.ReactNode;
   width?: number;
-  height?: number;
 }) => (
   <div
-    className="bg-[#FCFCFD] rounded-[20px] border border-[#E5E7EB] p-5 overflow-hidden flex flex-col shrink-0"
-    style={{ ...(width ? { width } : {}), ...(height ? { height } : {}) }}
+    className="bg-[#FCFCFD] rounded-[20px] border border-[#E5E7EB] p-5 flex flex-col shrink-0"
+    style={{ ...(width ? { width } : {}) }}
   >
     <span style={{ fontSize: 12, fontWeight: 600, color: '#969696' }}>{title}</span>
     <div className="mt-4 flex flex-col gap-5">
@@ -106,7 +105,7 @@ export const RightPanel = () => {
       style={{ width: 296 }}
     >
       {/* ── 캔버스 Card ────────────────────────── */}
-      <Card title="캔버스" width={296} height={324}>
+      <Card title="캔버스" width={296}>
         {/* 비율 */}
         <div>
           <SubLabel>비율</SubLabel>
@@ -132,24 +131,25 @@ export const RightPanel = () => {
         {/* 컬러 */}
         <div>
           <SubLabel>배경 컬러</SubLabel>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" style={{ height: 36 }}>
             {CANVAS_COLORS.map((c) => {
               const isWhite = c.toUpperCase() === '#FFFFFF';
               const isActive = backgroundColor.toUpperCase() === c.toUpperCase();
               const needsDarkCheck = c.toUpperCase() === '#FFFFFF' || c.toUpperCase() === '#FFE066' || c.toUpperCase() === '#F2EDE6';
+              const size = isActive ? 32 : 24;
               return (
                 <button
                   key={c}
                   onClick={() => handleCanvasColorChange(c)}
-                  className="transition-all duration-150 cursor-pointer shrink-0 flex items-center justify-center"
+                  className="cursor-pointer shrink-0 flex items-center justify-center"
                   style={{
-                    width: isActive ? 36 : 24,
-                    height: isActive ? 36 : 24,
+                    width: size,
+                    height: size,
                     borderRadius: 4,
                     backgroundColor: c,
-                    boxShadow: isWhite
-                      ? 'inset 0 0 0 1px #E5E7EB'
-                      : '0 0 0 1px rgba(0,0,0,0.06)',
+                    boxShadow: isActive
+                      ? (isWhite ? 'inset 0 0 0 1px #E5E7EB, 0 0 0 2px #FF6000' : '0 0 0 2px #FF6000')
+                      : (isWhite ? 'inset 0 0 0 1px #E5E7EB' : '0 0 0 1px rgba(0,0,0,0.06)'),
                   }}
                   title={c}
                 >
@@ -161,7 +161,7 @@ export const RightPanel = () => {
         </div>
 
         {/* 여백 가이드 */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col">
           <SubLabel>여백 가이드</SubLabel>
           <div className="flex items-center gap-2">
             <ToggleSwitch enabled={showMargins} onToggle={toggleMargins} />
@@ -173,7 +173,7 @@ export const RightPanel = () => {
       </Card>
 
       {/* ── 로고 Card ──────────────────────────── */}
-      <Card title="로고" width={296} height={164}>
+      <Card title="로고" width={296}>
         <div>
           {/* Column headers — 버튼 너비와 동일하게 맞춰 좌측 정렬 */}
           <div className="flex mb-2" style={{ gap: 24 }}>

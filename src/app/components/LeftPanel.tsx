@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
 import { nanoid } from 'nanoid';
 import { Type as TypeIcon } from 'lucide-react';
 import { useEditorStore } from '../store/useEditorStore';
@@ -32,22 +33,22 @@ const RANDOM_LAYOUTS: Record<string, { A: RLayoutEntry; B: RLayoutEntry; C: RLay
   '1:1': {
     A: { logoTop: 80,  gfxW: 500, gfxH: 500, gfxTop: 222,  gfxLeft: 290, gfxGapX: 0,  gfxGapY: 0,  textY1: 800, textY2: 872 },
     B: { logoTop: 80,  gfxW: 280, gfxH: 280, gfxTop: 342,  gfxLeft: 100, gfxGapX: 20, gfxGapY: 0,  textY1: 800, textY2: 872 },
-    C: { logoTop: 80,  gfxW: 188, gfxH: 188, gfxTop: 180,  gfxLeft: 242, gfxGapX: 16, gfxGapY: 16, textY1: 800, textY2: 872 },
+    C: { logoTop: 80,  gfxW: 160, gfxH: 160, gfxTop: 208,  gfxLeft: 264, gfxGapX: 36, gfxGapY: 36, textY1: 800, textY2: 872 },
   },
   '4:5': {
     A: { logoTop: 135, gfxW: 500, gfxH: 500, gfxTop: 359,  gfxLeft: 290, gfxGapX: 0,  gfxGapY: 0,  textY1: 978, textY2: 1060 },
     B: { logoTop: 135, gfxW: 280, gfxH: 280, gfxTop: 476,  gfxLeft: 100, gfxGapX: 20, gfxGapY: 0,  textY1: 978, textY2: 1060 },
-    C: { logoTop: 135, gfxW: 200, gfxH: 200, gfxTop: 302,  gfxLeft: 224, gfxGapX: 16, gfxGapY: 16, textY1: 978, textY2: 1060 },
+    C: { logoTop: 135, gfxW: 172, gfxH: 172, gfxTop: 312,  gfxLeft: 246, gfxGapX: 36, gfxGapY: 36, textY1: 978, textY2: 1060 },
   },
   '9:16': {
     A: { logoTop: 250, gfxW: 520, gfxH: 520, gfxTop: 568,  gfxLeft: 280, gfxGapX: 0,  gfxGapY: 0,  textY1: 1400, textY2: 1480 },
     B: { logoTop: 250, gfxW: 300, gfxH: 300, gfxTop: 678,  gfxLeft: 74,  gfxGapX: 16, gfxGapY: 0,  textY1: 1400, textY2: 1480 },
-    C: { logoTop: 250, gfxW: 240, gfxH: 240, gfxTop: 464,  gfxLeft: 164, gfxGapX: 16, gfxGapY: 16, textY1: 1400, textY2: 1480 },
+    C: { logoTop: 250, gfxW: 220, gfxH: 220, gfxTop: 464,  gfxLeft: 174, gfxGapX: 36, gfxGapY: 36, textY1: 1400, textY2: 1480 },
   },
   'A3': {
     A: { logoTop: 533, gfxW: 1560, gfxH: 1560, gfxTop: 1546, gfxLeft: 974, gfxGapX: 0,  gfxGapY: 0,  textY1: 3700, textY2: 3932 },
     B: { logoTop: 533, gfxW: 900,  gfxH: 900,  gfxTop: 1847, gfxLeft: 356, gfxGapX: 48, gfxGapY: 0,  textY1: 3700, textY2: 3932 },
-    C: { logoTop: 533, gfxW: 720,  gfxH: 720,  gfxTop: 1125, gfxLeft: 626, gfxGapX: 48, gfxGapY: 48, textY1: 3700, textY2: 3932 },
+    C: { logoTop: 533, gfxW: 640,  gfxH: 640,  gfxTop: 1136, gfxLeft: 694, gfxGapX: 100, gfxGapY: 100, textY1: 3700, textY2: 3932 },
   },
 };
 
@@ -61,6 +62,62 @@ const pickUnique = <T,>(arr: T[], n: number): T[] => {
     [copy[i], copy[j]] = [copy[j], copy[i]];
   }
   return copy.slice(0, n);
+};
+
+// ─── Color tooltip icon ─────────────────────────────────────────────────────
+const ColorTooltipIcon = () => {
+  const iconRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+
+  const handleMouseEnter = () => {
+    if (iconRef.current) {
+      const rect = iconRef.current.getBoundingClientRect();
+      setPos({ x: rect.left - 24, y: rect.top - 8 });
+    }
+    setVisible(true);
+  };
+
+  const handleMouseLeave = () => setVisible(false);
+
+  const tooltip = visible
+    ? ReactDOM.createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            left: pos.x,
+            top: pos.y,
+            transform: 'translateY(-100%)',
+            zIndex: 9999,
+            fontSize: 11,
+            pointerEvents: 'none',
+          }}
+          className="bg-black/85 text-white px-3 py-2 rounded-lg whitespace-nowrap shadow-lg"
+        >
+          그래픽, 텍스트, 로고에 동일 컬러가 적용됩니다.
+        </div>,
+        document.body,
+      )
+    : null;
+
+  return (
+    <>
+      <div
+        ref={iconRef}
+        className="w-4 h-4 flex items-center justify-center transition-all duration-150"
+        style={{ cursor: 'default', filter: visible ? 'brightness(0.75)' : undefined }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0.5" y="0.5" width="15" height="15" rx="7.5" fill="#F5F6F8"/>
+          <rect x="0.5" y="0.5" width="15" height="15" rx="7.5" stroke="#E5E7EB"/>
+          <path d="M8 5.29297C7.48438 5.29297 7.08594 4.90039 7.08594 4.4082C7.08594 3.91016 7.48438 3.52344 8 3.52344C8.51562 3.52344 8.91406 3.91016 8.91406 4.4082C8.91406 4.90039 8.51562 5.29297 8 5.29297ZM8 12.4766C7.4668 12.4766 7.14453 12.1426 7.14453 11.5859V6.83984C7.14453 6.2832 7.4668 5.94336 8 5.94336C8.52734 5.94336 8.85547 6.2832 8.85547 6.83984V11.5859C8.85547 12.1426 8.52734 12.4766 8 12.4766Z" fill="#CACED6"/>
+        </svg>
+      </div>
+      {tooltip}
+    </>
+  );
 };
 
 // ─── Section title ──────────────────────────────────────────────────────────
@@ -276,38 +333,28 @@ export const LeftPanel = () => {
         <div className="shrink-0 mb-5">
           <SectionTitle
             extra={
-              <div className="group relative">
-                <div
-                  className="w-4 h-4 rounded-full bg-[#FF6000] text-white flex items-center justify-center cursor-help"
-                  style={{ fontSize: 10, fontWeight: 700 }}
-                >!</div>
-                <div
-                  className="absolute left-0 top-6 z-50 hidden group-hover:block bg-black/85 text-white px-3 py-2 rounded-lg whitespace-nowrap shadow-lg"
-                  style={{ fontSize: 11 }}
-                >
-                  그래픽, 텍스트, 로고에 동일 컬러가 적용됩니다.
-                </div>
-              </div>
+              <ColorTooltipIcon />
             }
           >
             에셋 컬러
           </SectionTitle>
-          <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex flex-wrap gap-2 items-center" style={{ minHeight: 36 }}>
             {availableColors.map((c) => {
               const isWhite = c.toUpperCase() === '#FFFFFF';
               const isActive = themeColor.toUpperCase() === c.toUpperCase();
+              const size = isActive ? 32 : 24;
               return (
                 <button
                   key={c}
                   onClick={() => setThemeColor(c)}
-                  className="rounded-full transition-all duration-150 cursor-pointer shrink-0 flex items-center justify-center"
+                  className="rounded-full cursor-pointer shrink-0 flex items-center justify-center"
                   style={{
-                    width: isActive ? 36 : 24,
-                    height: isActive ? 36 : 24,
+                    width: size,
+                    height: size,
                     backgroundColor: c,
-                    boxShadow: isWhite
-                      ? 'inset 0 0 0 1px #E5E7EB'
-                      : '0 0 0 1px rgba(0,0,0,0.06)',
+                    boxShadow: isActive
+                      ? (isWhite ? 'inset 0 0 0 1px #E5E7EB, 0 0 0 2px #FF6000' : '0 0 0 2px #FF6000')
+                      : (isWhite ? 'inset 0 0 0 1px #E5E7EB' : '0 0 0 1px rgba(0,0,0,0.06)'),
                   }}
                   title={c}
                 >

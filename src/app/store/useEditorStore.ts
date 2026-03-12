@@ -1,6 +1,5 @@
 import { EditorState, EditorElement, FormatType, FORMATS, HistorySnapshot } from './types';
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { nanoid } from 'nanoid';
 
 const MAX_HISTORY = 30;
@@ -11,14 +10,13 @@ const makeSnapshot = (state: { elements: EditorElement[]; backgroundColor: strin
 });
 
 export const useEditorStore = create<EditorState>()(
-  persist(
-    (set, get) => ({
+  (set, get) => ({
       title: 'Untitled',
       format: '4:5',
       scale: 1,
       elements: [],
       selectedIds: [],
-      themeColor: '#FF6000',
+      themeColor: '#16A982',
       backgroundColor: '#FFFFFF',
       showMargins: true,
       showPrintSafeArea: false,
@@ -258,16 +256,5 @@ export const useEditorStore = create<EditorState>()(
         });
       },
 
-    }),
-    {
-      name: 'poster-editor-storage',
-      partialize: (state) => ({
-        elements: state.elements,
-        themeColor: state.themeColor,
-        backgroundColor: state.backgroundColor,
-        format: state.format,
-        title: state.title,
-      }),
-    }
-  )
+  })
 );

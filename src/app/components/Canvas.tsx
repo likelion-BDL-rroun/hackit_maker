@@ -52,6 +52,14 @@ export const Canvas = React.forwardRef<CanvasHandle, CanvasProps>(({ onExport },
   // Track initial state for text font-size scaling during resize
   const resizeInitRef = useRef<{ width: number; height: number; fontSize: number } | null>(null);
 
+  // Smart guide: DOM elements of all non-selected, visible elements
+  const elementGuidelines = useMemo(() => {
+    return elements
+      .filter(el => !selectedIds.includes(el.id) && el.visible !== false)
+      .map(el => document.getElementById(el.id))
+      .filter((el): el is HTMLElement => el !== null);
+  }, [elements, selectedIds]);
+
   const isA3 = format === 'A3';
   const isMobile = containerSize.width > 0 && containerSize.width < 768;
 
@@ -655,6 +663,9 @@ export const Canvas = React.forwardRef<CanvasHandle, CanvasProps>(({ onExport },
                 snapDirections={{ top: true, left: true, bottom: true, right: true, center: true, middle: true }}
                 elementSnapDirections={{ top: true, left: true, bottom: true, right: true, center: true, middle: true }}
                 snapThreshold={5}
+                elementGuidelines={elementGuidelines}
+                snapGap={true}
+                isDisplaySnapDigit={false}
                 verticalGuidelines={[
                   0, width / 2, width,
                   margins?.left || 0, width - (margins?.right || 0),
