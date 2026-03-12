@@ -8,11 +8,11 @@ import type { EditorElement } from '../store/types';
 
 // ─── Canvas-mapped asset colors ───────────────────────────────────────────────
 export const CANVAS_ASSET_COLOR_MAP: Record<string, string[]> = {
-  '#000000': ['#FFFFFF', '#FF6000', '#FF9500', '#FFCC00', '#34C759', '#00C7BE', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55'],
-  '#FFFFFF': ['#FF6000', '#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55', '#1D1D1F', '#636366'],
-  '#FF6000': ['#FFFFFF', '#1D1D1F', '#FFCC00', '#FFE066', '#FF2D55'],
-  '#F2EDE6': ['#FF6000', '#1D1D1F', '#FF3B30', '#007AFF', '#5856D6', '#AF52DE'],
-  '#FFE066': ['#FF6000', '#1D1D1F', '#FF3B30', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55'],
+  '#F2EDE6': ['#D20001', '#212842', '#5A2828', '#044340', '#FF7000', '#000000'],
+  '#FFE066': ['#F52D2D', '#194BDA', '#0B7027', '#8725AE', '#FF7000', '#000000'],
+  '#FFFFFF': ['#16A982', '#5C30FF', '#FF277F', '#2F2268', '#FF7000', '#000000'],
+  '#000000': ['#00F5FF', '#00FF95', '#D7FF00', '#FF00C8', '#FF7000', '#FFFFFF'],
+  '#FF6000': ['#020035', '#052D29', '#260B42', '#3C0B0B', '#000000', '#FFFFFF'],
 };
 
 const FULL_PALETTE = [
@@ -21,12 +21,47 @@ const FULL_PALETTE = [
   '#FF2D55', '#1D1D1F', '#636366', '#8E8E93',
 ];
 
-const RANDOM_COLORS = [
-  '#FF6000', '#FF3B30', '#FF9500', '#FFCC00', '#34C759',
-  '#00C7BE', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55', '#1D1D1F',
-];
+// ─── Random layout configs (absolute px per format, per type) ─────────────────
+type RLayoutEntry = {
+  logoTop: number;
+  gfxW: number; gfxH: number; gfxTop: number; gfxLeft: number;
+  gfxGapX: number; gfxGapY: number;
+  textY1: number; textY2: number;
+};
+const RANDOM_LAYOUTS: Record<string, { A: RLayoutEntry; B: RLayoutEntry; C: RLayoutEntry }> = {
+  '1:1': {
+    A: { logoTop: 80,  gfxW: 500, gfxH: 500, gfxTop: 222,  gfxLeft: 290, gfxGapX: 0,  gfxGapY: 0,  textY1: 800, textY2: 872 },
+    B: { logoTop: 80,  gfxW: 280, gfxH: 280, gfxTop: 342,  gfxLeft: 100, gfxGapX: 20, gfxGapY: 0,  textY1: 800, textY2: 872 },
+    C: { logoTop: 80,  gfxW: 188, gfxH: 188, gfxTop: 180,  gfxLeft: 242, gfxGapX: 16, gfxGapY: 16, textY1: 800, textY2: 872 },
+  },
+  '4:5': {
+    A: { logoTop: 135, gfxW: 500, gfxH: 500, gfxTop: 359,  gfxLeft: 290, gfxGapX: 0,  gfxGapY: 0,  textY1: 978, textY2: 1060 },
+    B: { logoTop: 135, gfxW: 280, gfxH: 280, gfxTop: 476,  gfxLeft: 100, gfxGapX: 20, gfxGapY: 0,  textY1: 978, textY2: 1060 },
+    C: { logoTop: 135, gfxW: 200, gfxH: 200, gfxTop: 302,  gfxLeft: 224, gfxGapX: 16, gfxGapY: 16, textY1: 978, textY2: 1060 },
+  },
+  '9:16': {
+    A: { logoTop: 250, gfxW: 520, gfxH: 520, gfxTop: 568,  gfxLeft: 280, gfxGapX: 0,  gfxGapY: 0,  textY1: 1400, textY2: 1480 },
+    B: { logoTop: 250, gfxW: 300, gfxH: 300, gfxTop: 678,  gfxLeft: 74,  gfxGapX: 16, gfxGapY: 0,  textY1: 1400, textY2: 1480 },
+    C: { logoTop: 250, gfxW: 240, gfxH: 240, gfxTop: 464,  gfxLeft: 164, gfxGapX: 16, gfxGapY: 16, textY1: 1400, textY2: 1480 },
+  },
+  'A3': {
+    A: { logoTop: 533, gfxW: 1560, gfxH: 1560, gfxTop: 1546, gfxLeft: 974, gfxGapX: 0,  gfxGapY: 0,  textY1: 3700, textY2: 3932 },
+    B: { logoTop: 533, gfxW: 900,  gfxH: 900,  gfxTop: 1847, gfxLeft: 356, gfxGapX: 48, gfxGapY: 0,  textY1: 3700, textY2: 3932 },
+    C: { logoTop: 533, gfxW: 720,  gfxH: 720,  gfxTop: 1125, gfxLeft: 626, gfxGapX: 48, gfxGapY: 48, textY1: 3700, textY2: 3932 },
+  },
+};
 
 const pickRandom = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
+// Fisher-Yates 셔플 후 앞에서 n개 반환 (비복원 추출 → 중복 없음)
+const pickUnique = <T,>(arr: T[], n: number): T[] => {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy.slice(0, n);
+};
 
 // ─── Section title ──────────────────────────────────────────────────────────
 const SectionTitle = ({ children, extra }: { children: React.ReactNode; extra?: React.ReactNode }) => (
@@ -90,86 +125,85 @@ export const LeftPanel = () => {
 
   // ── Random ────────────────────────────────────────────────────────────────
   const handleRandom = (count: 1 | 3 | 9) => {
+    const type = count === 1 ? 'A' : count === 3 ? 'B' : 'C';
+    const cfg = RANDOM_LAYOUTS[format][type];
     const newElements: EditorElement[] = [];
 
-    const logo = BRAND_LOGOS[0];
-    const logoW = (logo.defaultWidth ?? 300) * sizeMultiplier;
-    const logoH = (logo.defaultHeight ?? 60) * sizeMultiplier;
+    // Logo (국문) — 비율 유지, 판형별 고정 높이
+    const logo = BRAND_LOGOS.find((l) => l.name === '멋사대학') || BRAND_LOGOS[1];
+    const logoH = isA3 ? 143 : format === '1:1' ? 22 : 34;
+    const logoRatio = (logo.defaultWidth ?? 251) / (logo.defaultHeight ?? 40);
+    const logoW = Math.round(logoH * logoRatio);
     newElements.push({
       id: nanoid(), type: 'graphic',
-      x: Math.round((canvasW - logoW) / 2), y: Math.round(canvasH * 0.05),
+      x: Math.round((canvasW - logoW) / 2), y: cfg.logoTop,
       width: logoW, height: logoH, rotation: 0, visible: true, locked: false,
       graphicName: logo.name, style: { color: themeColor },
       content: logo.path, imageUrl: logo.imageUrl, isLogo: true,
     });
 
-    const gBase = 120 * sizeMultiplier;
+    // Graphics — 로고 제외 심볼만, 중복 없이 추출
+    const symbolGraphics = GRAPHICS.filter(g => !g.isLogo);
+    const picked = pickUnique(symbolGraphics, count);
 
-    if (count === 1) {
-      const g = pickRandom(GRAPHICS);
-      const gW = (g.defaultWidth ?? 120) * sizeMultiplier;
-      const gH = (g.defaultHeight ?? gW) * sizeMultiplier;
+    if (type === 'A') {
+      const g = picked[0];
       newElements.push({
         id: nanoid(), type: 'graphic',
-        x: Math.round((canvasW - gW) / 2), y: Math.round(canvasH * 0.35),
-        width: gW, height: gH, rotation: 0, visible: true, locked: false,
-        graphicName: g.name, style: { color: pickRandom(RANDOM_COLORS) },
+        x: cfg.gfxLeft, y: cfg.gfxTop,
+        width: cfg.gfxW, height: cfg.gfxH,
+        rotation: 0, visible: true, locked: false,
+        graphicName: g.name, style: { color: pickRandom(availableColors) },
         content: g.path, imageUrl: g.imageUrl,
       });
-    } else if (count === 3) {
-      const spacing = Math.round(canvasW * 0.3);
-      const midY = Math.round(canvasH * 0.42);
-      [-1, 0, 1].forEach((pos) => {
-        const g = pickRandom(GRAPHICS);
+    } else if (type === 'B') {
+      for (let i = 0; i < 3; i++) {
+        const g = picked[i];
         newElements.push({
           id: nanoid(), type: 'graphic',
-          x: Math.round(canvasW / 2 + pos * spacing - gBase / 2),
-          y: Math.round(midY - gBase / 2),
-          width: gBase, height: gBase, rotation: 0, visible: true, locked: false,
-          graphicName: g.name, style: { color: pickRandom(RANDOM_COLORS) },
+          x: cfg.gfxLeft + i * (cfg.gfxW + cfg.gfxGapX),
+          y: cfg.gfxTop,
+          width: cfg.gfxW, height: cfg.gfxH,
+          rotation: 0, visible: true, locked: false,
+          graphicName: g.name, style: { color: pickRandom(availableColors) },
           content: g.path, imageUrl: g.imageUrl,
         });
-      });
+      }
     } else {
-      const pad = Math.round(canvasW * 0.07);
-      const cellSize = Math.round((canvasW - pad * 2) / 3);
-      const gSize = Math.round(cellSize * 0.6);
-      const startY = Math.round(canvasH * 0.2);
       for (let row = 0; row < 3; row++) {
         for (let col = 0; col < 3; col++) {
-          const g = pickRandom(GRAPHICS);
-          const cx = pad + col * cellSize + cellSize / 2;
-          const cy = startY + row * cellSize + cellSize / 2;
+          const g = picked[row * 3 + col];
           newElements.push({
             id: nanoid(), type: 'graphic',
-            x: Math.round(cx - gSize / 2), y: Math.round(cy - gSize / 2),
-            width: gSize, height: gSize, rotation: 0, visible: true, locked: false,
-            graphicName: g.name, style: { color: pickRandom(RANDOM_COLORS) },
+            x: cfg.gfxLeft + col * (cfg.gfxW + cfg.gfxGapX),
+            y: cfg.gfxTop + row * (cfg.gfxH + cfg.gfxGapY),
+            width: cfg.gfxW, height: cfg.gfxH,
+            rotation: 0, visible: true, locked: false,
+            graphicName: g.name, style: { color: pickRandom(availableColors) },
             content: g.path, imageUrl: g.imageUrl,
           });
         }
       }
     }
 
-    const titleFS = 60 * sizeMultiplier;
-    const subFS = 30 * sizeMultiplier;
-    const textW = Math.round(canvasW * 0.8);
+    // Texts
+    const fontSize = format === 'A3' ? 220 : 72;
 
     newElements.push({
       id: nanoid(), type: 'text',
-      x: Math.round((canvasW - textW) / 2), y: Math.round(canvasH * 0.82),
-      width: textW, height: Math.round(titleFS * 1.3),
+      x: 0, y: cfg.textY1,
+      width: canvasW, height: Math.round(fontSize * 1.3),
       rotation: 0, visible: true, locked: false,
-      content: '제목을 입력하세요',
-      style: { fontSize: titleFS, fontWeight: 800, color: themeColor, textAlign: 'center' },
+      content: 'LIKELION UNIV.',
+      style: { fontSize, fontWeight: 800, color: themeColor, textAlign: 'center' },
     });
     newElements.push({
       id: nanoid(), type: 'text',
-      x: Math.round((canvasW - textW) / 2), y: Math.round(canvasH * 0.91),
-      width: textW, height: Math.round(subFS * 1.3),
+      x: 0, y: cfg.textY2,
+      width: canvasW, height: Math.round(fontSize * 1.3),
       rotation: 0, visible: true, locked: false,
-      content: '날짜와 장소를 입력하세요',
-      style: { fontSize: subFS, fontWeight: 400, color: themeColor, textAlign: 'center' },
+      content: '14TH HACKATHON',
+      style: { fontSize, fontWeight: 800, color: themeColor, textAlign: 'center' },
     });
 
     setAllElements(newElements);

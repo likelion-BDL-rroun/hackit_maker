@@ -6,6 +6,7 @@ import { cn } from '../../lib/utils';
 import { CanvasElement } from './CanvasElement';
 import { ContextToolbar } from './ContextToolbar';
 import { MobileToolbarPositioner } from './MobileToolbarPositioner';
+import iconArrowSync from '../../assets/icon_arrow-sync.svg';
 
 // Print safe area margins
 const A3_PRINT_MARGIN = 118;
@@ -276,7 +277,7 @@ export const Canvas = React.forwardRef<CanvasHandle, CanvasProps>(({ onExport },
       '1:1': { top: 60, bottom: 60, left: 60, right: 60 },
       '4:5': { top: 135, bottom: 135, left: 60, right: 60 },
       '9:16': { top: 250, bottom: 250, left: 60, right: 60 },
-      'A3': { top: 200, bottom: 200, left: 120, right: 120 },
+      'A3': { top: 118, bottom: 118, left: 118, right: 118 },
     };
     return marginMap[format];
   };
@@ -297,10 +298,9 @@ export const Canvas = React.forwardRef<CanvasHandle, CanvasProps>(({ onExport },
     const LINE        = 1;    // 선택 외곽선 두께 (px)
     const HANDLE      = 8;    // 리사이즈 핸들 크기 (px) — 정사각형
     const HANDLE_STK  = 0.5;  // 리사이즈 핸들 orange 스트로크 (px)
-    const ROT         = 10;   // 회전 핸들 지름 (px) — 원형
-    const ROT_BDR     = 1.5;  // 회전 핸들 흰색 테두리 (px)
+    const ROT         = 20;   // 회전 핸들 크기 (px) — 커스텀 아이콘
     const TOUCH_H     = 10;   // 터치 모드 리사이즈 핸들 (px)
-    const TOUCH_ROT   = 12;   // 터치 모드 회전 핸들 (px)
+    const TOUCH_ROT   = 24;   // 터치 모드 회전 핸들 (px)
     const TOUCH_HIT   = 44;   // 터치 히트 영역 (px)
     const TOUCH_HIT_R = 52;   // 회전 핸들 터치 히트 영역 (px)
 
@@ -309,7 +309,6 @@ export const Canvas = React.forwardRef<CanvasHandle, CanvasProps>(({ onExport },
     const h   = HANDLE      / s;
     const hs  = HANDLE_STK  / s;
     const r   = ROT         / s;
-    const rb  = ROT_BDR     / s;
     const th  = TOUCH_H     / s;
     const tr  = TOUCH_ROT   / s;
     const tt  = TOUCH_HIT   / s;
@@ -321,9 +320,9 @@ export const Canvas = React.forwardRef<CanvasHandle, CanvasProps>(({ onExport },
         height: ${l}px !important;
       }
 
-      /* ── 회전 가이드선: 두께(width)만 보정, 길이(height)는 라이브러리가 설정 ── */
+      /* ── 회전 가이드선: 숨김 ── */
       .moveable-rotation-line {
-        width: ${l}px !important;
+        display: none !important;
       }
 
       /* ── 리사이즈 핸들: 정사각형 / white fill / orange 0.5px 스트로크 ── */
@@ -337,15 +336,30 @@ export const Canvas = React.forwardRef<CanvasHandle, CanvasProps>(({ onExport },
         z-index: 1 !important;
       }
 
-      /* ── 회전 핸들: 원형 / orange fill / white 테두리 / 클릭 우선권 ── */
+      /* ── 회전 핸들: 커스텀 아이콘 (::after로 오버레이) ── */
       .moveable-rotation-control {
         width:         ${r}px !important;
         height:        ${r}px !important;
         margin-top:    ${-r / 2}px !important;
         margin-left:   ${-r / 2}px !important;
-        border-radius: 50% !important;
-        border:        ${rb}px solid white !important;
-        z-index: 10 !important;
+        border-radius: 0 !important;
+        border:        none !important;
+        background:    transparent !important;
+        box-shadow:    none !important;
+        z-index:       10 !important;
+      }
+      .moveable-rotation-control::after {
+        content:             '' !important;
+        position:            absolute !important;
+        top:                 0 !important;
+        left:                0 !important;
+        width:               100% !important;
+        height:              100% !important;
+        background-image:    url("${iconArrowSync}") !important;
+        background-size:     contain !important;
+        background-repeat:   no-repeat !important;
+        background-position: center !important;
+        pointer-events:      none !important;
       }
 
       /* ── 투명 터치 히트 영역 확장 (모든 디바이스) ── */
@@ -635,6 +649,7 @@ export const Canvas = React.forwardRef<CanvasHandle, CanvasProps>(({ onExport },
                 keepRatio={isGraphic || isText}
                 throttleResize={0}
                 rotatable={true}
+                rotationPosition="bottom"
                 throttleRotate={0}
                 snappable={true}
                 snapDirections={{ top: true, left: true, bottom: true, right: true, center: true, middle: true }}
@@ -846,30 +861,17 @@ export const Canvas = React.forwardRef<CanvasHandle, CanvasProps>(({ onExport },
       {/* ===== Floating UI — rendered as siblings of the scroll area, using fixed positioning ===== */}
       {/* These are NOT inside any transformed/scrolled container, so fixed works reliably */}
 
-      {/* Context Toolbar - Floating — hide when editing text */}
+      {/* Context Toolbar - Floating — always above the selected element, hide when editing text */}
       {selectedIds.length > 0 && selectedElement && interactionMode !== 'object_editing_text' && !isDragging && (
-        isMobile ? (
-          isGraphic ? (
-            // 그래픽 요소: PC와 동일하게 상단 고정 위치
-            <div className="fixed left-1/2 transform -translate-x-1/2 z-[200] top-[16px] max-w-[95vw]" style={{ pointerEvents: 'auto' }}>
-              <ContextToolbar isMobile />
-            </div>
-          ) : (
-            // 텍스트 요소: 기존 방식 유지 (요소 근처에 플로팅)
-            <MobileToolbarPositioner
-              element={selectedElement}
-              scale={scale}
-              containerRef={containerRef}
-              canvasRef={canvasRef}
-            >
-              <ContextToolbar isMobile />
-            </MobileToolbarPositioner>
-          )
-        ) : (
-          <div className="fixed left-1/2 transform -translate-x-1/2 z-[200] top-[16px] max-w-[95vw]" style={{ pointerEvents: 'auto' }}>
-            <ContextToolbar />
-          </div>
-        )
+        <MobileToolbarPositioner
+          element={selectedElement}
+          scale={scale}
+          containerRef={containerRef}
+          canvasRef={canvasRef}
+          preferAbove
+        >
+          <ContextToolbar isMobile={isMobile} />
+        </MobileToolbarPositioner>
       )}
 
       {/* Out-of-safe-area warning pill */}

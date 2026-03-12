@@ -98,7 +98,7 @@ export const RightPanel = () => {
 
   // Logo groups: 국문 and 영문
   const korLogo = BRAND_LOGOS.find((l) => l.name === '멋사대학') || BRAND_LOGOS[1];
-  const engLogo = BRAND_LOGOS.find((l) => l.name === 'LIKELION') || BRAND_LOGOS[0];
+  const engLogo = BRAND_LOGOS.find((l) => l.name === 'LIKELION UNIV.') || BRAND_LOGOS[0];
 
   return (
     <div
@@ -175,56 +175,37 @@ export const RightPanel = () => {
       {/* ── 로고 Card ──────────────────────────── */}
       <Card title="로고" width={296} height={164}>
         <div>
-          {/* Column headers */}
-          <div className="grid grid-cols-2 gap-2 mb-2">
-            <span style={{ fontSize: 14, fontWeight: 600, color: '#1D1D1F' }}>국문</span>
-            <span style={{ fontSize: 14, fontWeight: 600, color: '#1D1D1F' }}>영문</span>
+          {/* Column headers — 버튼 너비와 동일하게 맞춰 좌측 정렬 */}
+          <div className="flex mb-2" style={{ gap: 24 }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#1D1D1F', width: 68 }}>국문</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#1D1D1F', width: 122 }}>영문</span>
           </div>
 
-          {/* Logo buttons */}
-          <div className="grid grid-cols-2 gap-2">
+          {/* Logo buttons — 텍스트 표시, 클릭 시 캔버스에 로고 추가 */}
+          <div className="flex" style={{ gap: 24 }}>
             <button
               onClick={() => handleAddLogo(korLogo)}
-              className="flex items-center justify-center px-3 py-2.5 rounded-[10px] border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all cursor-pointer"
+              className="flex items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-[#F5F6F8] hover:bg-[#EDEEF1] transition-all cursor-pointer shrink-0"
+              style={{ width: 68, height: 40 }}
               title={korLogo.name}
             >
-              <div
-                style={{
-                  height: 20,
-                  width: Math.round((korLogo.defaultWidth ?? 280) * (20 / (korLogo.defaultHeight ?? 80))),
-                  backgroundColor: themeColor,
-                  WebkitMaskImage: `url(${korLogo.imageUrl})`,
-                  WebkitMaskSize: 'contain',
-                  WebkitMaskRepeat: 'no-repeat',
-                  WebkitMaskPosition: 'center',
-                  maskImage: `url(${korLogo.imageUrl})`,
-                  maskSize: 'contain',
-                  maskRepeat: 'no-repeat',
-                  maskPosition: 'center',
-                }}
-              />
+              <span style={{ fontSize: 14, fontWeight: 700, color: themeColor }}>
+                {korLogo.name}
+              </span>
             </button>
 
             <button
               onClick={() => handleAddLogo(engLogo)}
-              className="flex items-center justify-center px-3 py-2.5 rounded-[10px] border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all cursor-pointer"
+              className="flex items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-[#F5F6F8] hover:bg-[#EDEEF1] transition-all cursor-pointer shrink-0"
+              style={{ width: 122, height: 40 }}
               title={engLogo.name}
             >
-              <div
-                style={{
-                  height: 20,
-                  width: Math.round((engLogo.defaultWidth ?? 300) * (20 / (engLogo.defaultHeight ?? 60))),
-                  backgroundColor: themeColor,
-                  WebkitMaskImage: `url(${engLogo.imageUrl})`,
-                  WebkitMaskSize: 'contain',
-                  WebkitMaskRepeat: 'no-repeat',
-                  WebkitMaskPosition: 'center',
-                  maskImage: `url(${engLogo.imageUrl})`,
-                  maskSize: 'contain',
-                  maskRepeat: 'no-repeat',
-                  maskPosition: 'center',
-                }}
-              />
+              <span
+                className="text-center leading-tight"
+                style={{ fontSize: 14, fontWeight: 700, color: themeColor }}
+              >
+                {engLogo.name}
+              </span>
             </button>
           </div>
         </div>

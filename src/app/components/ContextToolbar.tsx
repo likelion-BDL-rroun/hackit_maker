@@ -1,20 +1,12 @@
 import { useEditorStore } from '../store/useEditorStore';
 import {
   Trash2, Copy, AlignLeft, AlignCenter, AlignRight,
-  ArrowUpToLine, ArrowDownToLine, MoreHorizontal,
+  MoreHorizontal,
   Minus, Plus, Type as TypeIcon,
-  Palette,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-
-// Same presets as SidebarContent — single global color for graphics, logos, text
-const PRESET_COLORS = [
-  '#FFFFFF', '#FF6000', '#FF3B30', '#FF9500', '#FFCC00', '#34C759',
-  '#00C7BE', '#30B0C7', '#007AFF', '#5856D6', '#AF52DE',
-  '#FF2D55', '#1D1D1F', '#636366', '#8E8E93',
-];
 
 // ─── Reusable: Inline editable font size input ───
 const FontSizeInput = ({
@@ -124,34 +116,8 @@ const MobileBtn = ({
     )}
     title={label}
   >
-    <Icon className="w-[18px] h-[18px]" />
+    <Icon className="w-6 h-6" />
     <span style={{ fontSize: '9px', fontWeight: 500, lineHeight: 1 }}>{label}</span>
-  </button>
-);
-
-// ─── Color chip for mobile toolbar ───
-const ColorChip = ({
-  color,
-  active,
-  onClick,
-  border,
-}: {
-  color: string;
-  active: boolean;
-  onClick: () => void;
-  border?: boolean;
-}) => (
-  <button
-    onClick={onClick}
-    className={cn(
-      "min-w-[44px] min-h-[44px] flex items-center justify-center rounded-[8px] cursor-pointer transition-colors",
-      active ? "bg-orange-50 ring-2 ring-[#FF6000]" : "active:bg-gray-100",
-    )}
-  >
-    <div
-      className={cn("w-6 h-6 rounded-full", border && "border border-gray-300")}
-      style={{ backgroundColor: color }}
-    />
   </button>
 );
 
@@ -168,12 +134,12 @@ const FONT_WEIGHTS = [
 
 // ═══════════════════════════════════════════════════════
 // MOBILE GRAPHIC TOOLBAR
-// PC와 동일한 기능만: 복제, 삭제, 앞으로, 뒤로
+// 복제, 삭제
 // ═══════════════════════════════════════════════════════
 const MobileGraphicToolbar = () => {
   const {
     selectedIds, elements,
-    removeElements, duplicateElement, bringToFront, sendToBack,
+    removeElements, duplicateElement,
   } = useEditorStore();
   const selectedId = selectedIds[0];
   const element = elements.find(el => el.id === selectedId);
@@ -184,24 +150,12 @@ const MobileGraphicToolbar = () => {
       className="bg-white shadow-xl rounded-[12px] border border-gray-100 p-1.5 flex items-center gap-1"
       style={{ animation: 'fadeIn 0.15s ease-out' }}
     >
-      {/* Layer order */}
-      <div className="flex items-center gap-0.5 border-r border-gray-200 pr-1.5 mr-0.5">
-        <button onClick={() => bringToFront(selectedId)} className="p-1.5 hover:bg-gray-100 active:bg-gray-100 rounded-[6px] text-gray-500 hover:text-gray-700 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center" title="맨 앞으로">
-          <ArrowUpToLine className="w-4 h-4" />
-        </button>
-        <button onClick={() => sendToBack(selectedId)} className="p-1.5 hover:bg-gray-100 active:bg-gray-100 rounded-[6px] text-gray-500 hover:text-gray-700 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center" title="맨 뒤로">
-          <ArrowDownToLine className="w-4 h-4" />
-        </button>
-      </div>
-      {/* Duplicate + Delete */}
-      <div className="flex items-center gap-0.5">
-        <button onClick={() => duplicateElement(selectedId)} className="p-1.5 hover:bg-gray-100 active:bg-gray-100 rounded-[6px] text-gray-500 hover:text-blue-600 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center" title="복제">
-          <Copy className="w-4 h-4" />
-        </button>
-        <button onClick={() => removeElements([selectedId])} className="p-1.5 hover:bg-red-50 active:bg-red-50 rounded-[6px] text-gray-500 hover:text-red-600 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center" title="삭제">
-          <Trash2 className="w-4 h-4" />
-        </button>
-      </div>
+      <button onClick={() => duplicateElement(selectedId)} className="w-6 h-6 flex items-center justify-center hover:bg-gray-100 active:bg-gray-100 rounded-[6px] text-gray-500 hover:text-blue-600 cursor-pointer" title="복제">
+        <Copy className="w-4 h-4" />
+      </button>
+      <button onClick={() => removeElements([selectedId])} className="w-6 h-6 flex items-center justify-center hover:bg-red-50 active:bg-red-50 rounded-[6px] text-gray-500 hover:text-red-600 cursor-pointer" title="삭제">
+        <Trash2 className="w-4 h-4" />
+      </button>
     </div>
   );
 };
@@ -213,7 +167,7 @@ const MobileGraphicToolbar = () => {
 // Level 3: Detail card above level 2
 // ═══════════════════════════════════════════════════════
 
-type TextMenuFeature = 'fontStyle' | 'align' | 'color';
+type TextMenuFeature = 'fontStyle' | 'align';
 
 // ─── Level 3: Detail card ───
 const TextDetailCard = ({
@@ -223,7 +177,7 @@ const TextDetailCard = ({
   feature: TextMenuFeature;
   onClose: () => void;
 }) => {
-  const { selectedIds, elements, themeColor, setThemeColor, updateElement } = useEditorStore();
+  const { selectedIds, elements, updateElement } = useEditorStore();
   const selectedId = selectedIds[0];
   const element = elements.find(el => el.id === selectedId);
   if (!element || element.type !== 'text') return null;
@@ -296,30 +250,6 @@ const TextDetailCard = ({
         </div>
       )}
 
-      {/* Color: global theme color (graphics, logos, text) */}
-      {feature === 'color' && (
-        <div className="flex gap-2 flex-wrap justify-center">
-          {PRESET_COLORS.map((color) => {
-            const isWhite = color.toUpperCase() === '#FFFFFF';
-            const isActive = themeColor.toUpperCase() === color.toUpperCase();
-            return (
-              <button
-                key={color}
-                onClick={() => setThemeColor(color)}
-                className={cn(
-                  "w-8 h-8 rounded-full transition-all cursor-pointer flex-shrink-0",
-                  isActive && "scale-110 ring-2 ring-[#FF6000]"
-                )}
-                style={{
-                  backgroundColor: color,
-                  boxShadow: isWhite ? 'inset 0 0 0 1px #E5E7EB' : undefined,
-                }}
-                title={color}
-              />
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 };
@@ -335,7 +265,6 @@ const TextBottomBar = ({
   const features: { id: TextMenuFeature; icon: React.ElementType; label: string }[] = [
     { id: 'fontStyle', icon: TypeIcon, label: '스타일' },
     { id: 'align', icon: AlignCenter, label: '정렬' },
-    { id: 'color', icon: Palette, label: '색상' },
   ];
 
   return (
@@ -409,60 +338,58 @@ const MobileTextToolbar = () => {
     <>
       {/* ── Level 1: Floating toolbar ── */}
       <div
-        className="bg-white shadow-xl rounded-[14px] border border-gray-100 p-1.5 flex items-center gap-0.5"
+        className="bg-white shadow-xl rounded-[14px] border border-gray-100 p-1.5 flex items-center gap-1"
         style={{ animation: 'fadeIn 0.15s ease-out' }}
       >
-        {/* Font size A-/value/A+ */}
+        {/* Font size -/value/+ */}
         <button
           onClick={() => updateStyle('fontSize', Math.max(8, fontSize - 2))}
-          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-[8px] active:bg-gray-100 cursor-pointer text-gray-600"
-          style={{ fontSize: '13px', fontWeight: 600 }}
+          className="w-6 h-6 flex items-center justify-center rounded-[6px] hover:bg-gray-100 active:bg-gray-100 cursor-pointer text-gray-600"
         >
-          A<Minus className="w-3 h-3 ml-px" />
+          <Minus className="w-4 h-4" />
         </button>
         <FontSizeInput value={fontSize} onChange={(v) => updateStyle('fontSize', v)} large />
         <button
           onClick={() => updateStyle('fontSize', Math.min(999, fontSize + 2))}
-          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-[8px] active:bg-gray-100 cursor-pointer text-gray-600"
-          style={{ fontSize: '13px', fontWeight: 600 }}
+          className="w-6 h-6 flex items-center justify-center rounded-[6px] hover:bg-gray-100 active:bg-gray-100 cursor-pointer text-gray-600"
         >
-          A<Plus className="w-3 h-3 ml-px" />
+          <Plus className="w-4 h-4" />
         </button>
 
-        <div className="w-px h-7 bg-gray-200 mx-0.5" />
+        <div className="w-px h-4 bg-gray-200 mx-0.5" />
 
         {/* Copy */}
         <button
           onClick={() => duplicateElement(selectedId)}
-          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-[8px] text-gray-500 active:bg-gray-100 cursor-pointer"
+          className="w-6 h-6 flex items-center justify-center rounded-[6px] text-gray-500 hover:bg-gray-100 active:bg-gray-100 cursor-pointer"
           title="복제"
         >
-          <Copy className="w-[18px] h-[18px]" />
+          <Copy className="w-4 h-4" />
         </button>
 
         {/* Delete */}
         <button
           onClick={() => removeElements([selectedId])}
-          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-[8px] text-gray-500 active:bg-red-50 active:text-red-500 cursor-pointer"
+          className="w-6 h-6 flex items-center justify-center rounded-[6px] text-gray-500 hover:bg-red-50 active:bg-red-50 active:text-red-500 cursor-pointer"
           title="삭제"
         >
-          <Trash2 className="w-[18px] h-[18px]" />
+          <Trash2 className="w-4 h-4" />
         </button>
 
-        <div className="w-px h-7 bg-gray-200 mx-0.5" />
+        <div className="w-px h-4 bg-gray-200 mx-0.5" />
 
         {/* Menu "…" */}
         <button
           onClick={handleMenuToggle}
           className={cn(
-            "min-w-[44px] min-h-[44px] flex items-center justify-center rounded-[8px] cursor-pointer transition-colors",
+            "w-6 h-6 flex items-center justify-center rounded-[6px] cursor-pointer transition-colors",
             mobileTextMenuOpen
               ? "bg-[#FF6000]/10 text-[#FF6000]"
-              : "text-gray-500 active:bg-gray-100"
+              : "text-gray-500 hover:bg-gray-100 active:bg-gray-100"
           )}
           title="메뉴"
         >
-          <MoreHorizontal className="w-5 h-5" />
+          <MoreHorizontal className="w-4 h-4" />
         </button>
       </div>
 
@@ -505,7 +432,6 @@ const MobileTextToolbar = () => {
 const DesktopToolbar = () => {
   const {
     selectedIds, elements, themeColor, setThemeColor, updateElement, removeElements, duplicateElement,
-    bringToFront, sendToBack,
   } = useEditorStore();
 
   const selectedId = selectedIds[0];
@@ -540,18 +466,16 @@ const DesktopToolbar = () => {
           <div className="flex items-center border-r border-gray-200 pr-1.5 mr-0.5 gap-0.5">
             <button
               onClick={() => updateStyle('fontSize', Math.max(8, (element.style?.fontSize || 16) - 2))}
-              className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded-[6px] text-gray-600 cursor-pointer"
-              style={{ fontSize: '11px', fontWeight: 600 }}
+              className="w-6 h-6 flex items-center justify-center hover:bg-gray-100 rounded-[6px] text-gray-600 cursor-pointer"
             >
-              A-
+              <Minus className="w-4 h-4" />
             </button>
             <FontSizeInput value={element.style?.fontSize || 16} onChange={(v) => updateStyle('fontSize', v)} />
             <button
               onClick={() => updateStyle('fontSize', Math.min(200, (element.style?.fontSize || 16) + 2))}
-              className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded-[6px] text-gray-600 cursor-pointer"
-              style={{ fontSize: '11px', fontWeight: 600 }}
+              className="w-6 h-6 flex items-center justify-center hover:bg-gray-100 rounded-[6px] text-gray-600 cursor-pointer"
             >
-              A+
+              <Plus className="w-4 h-4" />
             </button>
           </div>
 
@@ -566,11 +490,11 @@ const DesktopToolbar = () => {
                 key={align}
                 onClick={() => updateStyle('textAlign', align)}
                 className={cn(
-                  "p-1.5 rounded-[6px] hover:bg-gray-100 cursor-pointer transition-colors",
+                  "w-6 h-6 flex items-center justify-center rounded-[6px] hover:bg-gray-100 cursor-pointer transition-colors",
                   element.style?.textAlign === align && "bg-orange-50 text-[#FF6000]"
                 )}
               >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className="w-4 h-4" />
               </button>
             ))}
           </div>
@@ -601,23 +525,13 @@ const DesktopToolbar = () => {
         </>
       )}
 
-      {/* Common: Layer order */}
-      <div className="flex items-center gap-0.5 border-r border-gray-200 pr-1.5 mr-0.5">
-        <button onClick={() => bringToFront(selectedId)} className="p-1.5 hover:bg-gray-100 rounded-[6px] text-gray-500 hover:text-gray-700 cursor-pointer" title="맨 앞으로">
-          <ArrowUpToLine className="w-3.5 h-3.5" />
-        </button>
-        <button onClick={() => sendToBack(selectedId)} className="p-1.5 hover:bg-gray-100 rounded-[6px] text-gray-500 hover:text-gray-700 cursor-pointer" title="맨 뒤로">
-          <ArrowDownToLine className="w-3.5 h-3.5" />
-        </button>
-      </div>
-
       {/* Common: Duplicate + Delete */}
       <div className="flex items-center gap-0.5">
-        <button onClick={() => duplicateElement(selectedId)} className="p-1.5 hover:bg-gray-100 rounded-[6px] text-gray-500 hover:text-blue-600 cursor-pointer" title="복제">
-          <Copy className="w-3.5 h-3.5" />
+        <button onClick={() => duplicateElement(selectedId)} className="w-6 h-6 flex items-center justify-center hover:bg-gray-100 rounded-[6px] text-gray-500 hover:text-blue-600 cursor-pointer" title="복제">
+          <Copy className="w-4 h-4" />
         </button>
-        <button onClick={() => removeElements([selectedId])} className="p-1.5 hover:bg-red-50 rounded-[6px] text-gray-500 hover:text-red-600 cursor-pointer" title="삭제">
-          <Trash2 className="w-3.5 h-3.5" />
+        <button onClick={() => removeElements([selectedId])} className="w-6 h-6 flex items-center justify-center hover:bg-red-50 rounded-[6px] text-gray-500 hover:text-red-600 cursor-pointer" title="삭제">
+          <Trash2 className="w-4 h-4" />
         </button>
       </div>
     </div>

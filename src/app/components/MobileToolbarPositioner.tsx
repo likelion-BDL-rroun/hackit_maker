@@ -12,6 +12,8 @@ interface Props {
   containerRef: React.RefObject<HTMLDivElement | null>;
   canvasRef: React.RefObject<HTMLDivElement | null>;
   children: React.ReactNode;
+  /** When true, prefers placing toolbar above the element (default: below) */
+  preferAbove?: boolean;
 }
 
 /**
@@ -27,6 +29,7 @@ export const MobileToolbarPositioner = ({
   containerRef,
   canvasRef,
   children,
+  preferAbove = false,
 }: Props) => {
   const toolbarRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
@@ -60,18 +63,30 @@ export const MobileToolbarPositioner = ({
     const spaceBelow = vpH - BOTTOM_TAB_H - elBottom;
 
     let top: number;
-    if (spaceBelow >= tbH + TOOLBAR_GAP) {
-      // Place below the element
-      top = elBottom + TOOLBAR_GAP;
-    } else if (spaceAbove >= tbH + TOOLBAR_GAP) {
-      // Place above the element
-      top = elScreenY - tbH - TOOLBAR_GAP;
-    } else {
-      // Not enough room on either side — place where there's more space
-      if (spaceBelow > spaceAbove) {
+    if (preferAbove) {
+      // Prefer above the element
+      if (spaceAbove >= tbH + TOOLBAR_GAP) {
+        top = elScreenY - tbH - TOOLBAR_GAP;
+      } else if (spaceBelow >= tbH + TOOLBAR_GAP) {
         top = elBottom + TOOLBAR_GAP;
       } else {
+        // Not enough room on either side — force above
         top = elScreenY - tbH - TOOLBAR_GAP;
+      }
+    } else {
+      if (spaceBelow >= tbH + TOOLBAR_GAP) {
+        // Place below the element
+        top = elBottom + TOOLBAR_GAP;
+      } else if (spaceAbove >= tbH + TOOLBAR_GAP) {
+        // Place above the element
+        top = elScreenY - tbH - TOOLBAR_GAP;
+      } else {
+        // Not enough room on either side — place where there's more space
+        if (spaceBelow > spaceAbove) {
+          top = elBottom + TOOLBAR_GAP;
+        } else {
+          top = elScreenY - tbH - TOOLBAR_GAP;
+        }
       }
     }
 
@@ -83,7 +98,7 @@ export const MobileToolbarPositioner = ({
     left = Math.max(EDGE_PAD, Math.min(left, vpW - tbW - EDGE_PAD));
 
     setPos({ left, top });
-  }, [element, scale, canvasRef, containerRef]);
+  }, [element, scale, canvasRef, containerRef, preferAbove]);
 
   // Recompute on mount, scroll, resize
   useEffect(() => {

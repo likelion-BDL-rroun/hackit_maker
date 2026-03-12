@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import { useEditorStore } from '../store/useEditorStore';
 import { cn } from '../../lib/utils';
-import { EditorElement } from '../store/types';
+import { EditorElement, FORMATS } from '../store/types';
 
 interface CanvasElementProps {
   element: EditorElement;
@@ -14,24 +14,44 @@ const MIN_TEXT_WIDTH = 24;
 const MIN_TEXT_HEIGHT = 20;
 
 export const CanvasElement = ({ element, themeColor, isSelected, onSelect }: CanvasElementProps) => {
-  const { updateElement, editingTextId, setEditingTextId, interactionMode } = useEditorStore();
+  const { updateElement, editingTextId, setEditingTextId, interactionMode, format } = useEditorStore();
+  const canvasW = FORMATS[format].width;
   const elementRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const isText = element.type === 'text';
   const isEditing = editingTextId === element.id;
   const lastTapRef = useRef<number>(0);
 
-  // Measure the text div's natural content size and sync to store
+  // Measure the text div's natural content size and sync to store.
+  // Auto-centers elements that were placed spanning the full canvas width (x≈0, width≈canvasW).
   const measureAndSync = useCallback(() => {
     if (!isText || !textRef.current) return;
     const el = textRef.current;
     const measuredW = Math.max(el.offsetWidth, MIN_TEXT_WIDTH);
     const measuredH = Math.max(el.offsetHeight, MIN_TEXT_HEIGHT);
 
+    const updates: Partial<EditorElement> = {};
+
     if (Math.abs(measuredW - element.width) > 0.5 || Math.abs(measuredH - element.height) > 0.5) {
-      updateElement(element.id, { width: measuredW, height: measuredH });
+      updates.width = measuredW;
+      updates.height = measuredH;
     }
-  }, [isText, element.id, element.width, element.height, updateElement]);
+
+    // Auto-center: element placed at x≈0 with width≈canvasW and textAlign center
+    if (
+      element.style?.textAlign === 'center' &&
+      element.width >= canvasW - 10 &&
+      element.x <= 10
+    ) {
+      updates.width = measuredW;
+      updates.height = measuredH;
+      updates.x = Math.round((canvasW - measuredW) / 2);
+    }
+
+    if (Object.keys(updates).length > 0) {
+      updateElement(element.id, updates);
+    }
+  }, [isText, element.id, element.width, element.height, element.x, element.style?.textAlign, canvasW, updateElement]);
 
   // Re-measure whenever font size, weight, or content changes in the store
   useEffect(() => {

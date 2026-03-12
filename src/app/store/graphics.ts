@@ -31,8 +31,8 @@ import imgUfo from '../../assets/new-graphics/29_UFO.png';
 import imgGhost from '../../assets/new-graphics/30_ghost.png';
 
 // Logos
-import imgLogoLikelion from '../../assets/c5914f048948c4d542e04d194615de5ffe5cbbb2.png';
-import imgLogoUniv from '../../assets/f579b1e5a34f1596dd863a7069d370f16099e9cf.png';
+import imgLogoLikelion from '../../assets/logo-likelion-univ-eng.png';
+import imgLogoUniv from '../../assets/logo-likelion-univ-kr.png';
 import imgLogoFull from '../../assets/e8d67e4acbfc2c170ee6a49c0a9f3d9b71910bcd.png';
 
 export interface GraphicDef {
@@ -91,7 +91,7 @@ export const GRAPHICS: GraphicDef[] = [
 
 // ── Logo 에셋 (그래픽과 동일하게 전역 themeColor 적용) ──
 export const BRAND_LOGOS: GraphicDef[] = [
-  { name: 'LIKELION', category: '로고', viewBox: '0 0 100 100', path: '', imageUrl: imgLogoLikelion, defaultWidth: 300, defaultHeight: 60, keywords: ['멋사', 'likelion', '로고', '영문'], isLogo: true },
-  { name: '멋사대학', category: '로고', viewBox: '0 0 100 100', path: '', imageUrl: imgLogoUniv, defaultWidth: 280, defaultHeight: 80, keywords: ['대학', '멋사대학', '로고', '한글'], isLogo: true },
+  { name: 'LIKELION UNIV.', category: '로고', viewBox: '0 0 100 100', path: '', imageUrl: imgLogoLikelion, defaultWidth: 496, defaultHeight: 40, keywords: ['멋사', 'likelion', '로고', '영문', 'univ'], isLogo: true },
+  { name: '멋사대학', category: '로고', viewBox: '0 0 100 100', path: '', imageUrl: imgLogoUniv, defaultWidth: 251, defaultHeight: 40, keywords: ['대학', '멋사대학', '로고', '한글'], isLogo: true },
   { name: '멋쟁이사자처럼', category: '로고', viewBox: '0 0 100 100', path: '', imageUrl: imgLogoFull, defaultWidth: 320, defaultHeight: 60, keywords: ['멋쟁이사자처럼', '풀네임', '로고', '한글'], isLogo: true },
 ];

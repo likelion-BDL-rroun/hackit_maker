@@ -21,7 +21,7 @@ export const useEditorStore = create<EditorState>()(
       themeColor: '#FF6000',
       backgroundColor: '#FFFFFF',
       showMargins: true,
-      showPrintSafeArea: true,
+      showPrintSafeArea: false,
       printPreviewMode: false,
       sidebarOpen: true,
       interactionMode: 'idle',
