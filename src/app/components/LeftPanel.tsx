@@ -11,7 +11,7 @@ export const CANVAS_ASSET_COLOR_MAP: Record<string, string[]> = {
   '#F2EDE6': ['#D20001', '#212842', '#5A2828', '#044340', '#FF7000', '#000000'],
   '#FFE066': ['#F52D2D', '#194BDA', '#0B7027', '#8725AE', '#FF7000', '#000000'],
   '#FFFFFF': ['#16A982', '#5C30FF', '#FF277F', '#2F2268', '#FF7000', '#000000'],
-  '#000000': ['#00F5FF', '#00FF95', '#D7FF00', '#FF00C8', '#FF7000', '#FFFFFF'],
+  '#000000': ['#00F5FF', '#00FF95', '#FFF600', '#FF00C8', '#FF7000', '#FFFFFF'],
   '#FF6000': ['#020035', '#052D29', '#260B42', '#3C0B0B', '#000000', '#FFFFFF'],
 };
 
@@ -290,7 +290,7 @@ export const LeftPanel = () => {
               </div>
             }
           >
-            컬러
+            에셋 컬러
           </SectionTitle>
           <div className="flex flex-wrap gap-2 items-center">
             {availableColors.map((c) => {

@@ -131,7 +131,7 @@ export const RightPanel = () => {
 
         {/* 컬러 */}
         <div>
-          <SubLabel>컬러</SubLabel>
+          <SubLabel>배경 컬러</SubLabel>
           <div className="flex items-center gap-2">
             {CANVAS_COLORS.map((c) => {
               const isWhite = c.toUpperCase() === '#FFFFFF';
