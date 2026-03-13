@@ -16,20 +16,20 @@ export const CANVAS_ASSET_COLOR_MAP: Record<string, string[]> = {
   '#FF6000': ['#020035', '#052D29', '#260B42', '#3C0B0B', '#000000', '#FFFFFF'],
 };
 
-const FULL_PALETTE = [
+export const FULL_PALETTE = [
   '#FFFFFF', '#FF6000', '#FF3B30', '#FF9500', '#FFCC00', '#34C759',
   '#00C7BE', '#30B0C7', '#007AFF', '#5856D6', '#AF52DE',
   '#FF2D55', '#1D1D1F', '#636366', '#8E8E93',
 ];
 
 // ─── Random layout configs (absolute px per format, per type) ─────────────────
-type RLayoutEntry = {
+export type RLayoutEntry = {
   logoTop: number;
   gfxW: number; gfxH: number; gfxTop: number; gfxLeft: number;
   gfxGapX: number; gfxGapY: number;
   textY1: number; textY2: number;
 };
-const RANDOM_LAYOUTS: Record<string, { A: RLayoutEntry; B: RLayoutEntry; C: RLayoutEntry }> = {
+export const RANDOM_LAYOUTS: Record<string, { A: RLayoutEntry; B: RLayoutEntry; C: RLayoutEntry }> = {
   '1:1': {
     A: { logoTop: 80,  gfxW: 500, gfxH: 500, gfxTop: 222,  gfxLeft: 290, gfxGapX: 0,  gfxGapY: 0,  textY1: 800, textY2: 872 },
     B: { logoTop: 80,  gfxW: 280, gfxH: 280, gfxTop: 342,  gfxLeft: 100, gfxGapX: 20, gfxGapY: 0,  textY1: 800, textY2: 872 },

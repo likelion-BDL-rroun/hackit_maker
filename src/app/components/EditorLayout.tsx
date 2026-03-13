@@ -1,16 +1,31 @@
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { LeftPanel } from './LeftPanel';
 import { RightPanel } from './RightPanel';
 import { Canvas, type CanvasHandle } from './Canvas';
 import { ZoomControls } from './ZoomControls';
+import { MobileBottomPanel } from './MobileBottomPanel';
 import { useEditorStore } from '../store/useEditorStore';
 import { toPng } from 'html-to-image';
 import { toast } from 'sonner';
 import { FORMATS } from '../store/types';
+import { Undo2, Redo2, Download } from 'lucide-react';
+
+const MOBILE_BREAKPOINT = 744;
 
 export const EditorLayout = () => {
-  const { undo, redo, format, scale } = useEditorStore();
+  const { undo, redo, format, scale, history } = useEditorStore();
   const canvasRef = useRef<CanvasHandle>(null);
+
+  // ── Mobile detection ──────────────────────────────────────────────────────
+  const [windowWidth, setWindowWidth] = useState(() => window.innerWidth);
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  const isMobile = windowWidth <= MOBILE_BREAKPOINT;
+  const canUndo = history.past.length > 0;
+  const canRedo = history.future.length > 0;
 
   // ── PNG export ───────────────────────────────────────────────────────────────
   const handleExport = useCallback(async () => {
@@ -100,6 +115,57 @@ export const EditorLayout = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [undo, redo]);
 
+  // ── Mobile layout ─────────────────────────────────────────────────────────
+  if (isMobile) {
+    return (
+      <div
+        className="h-dvh w-screen overflow-hidden bg-[#F5F5F7] text-gray-900 flex flex-col"
+        style={{ fontFamily: "'Cabinet Grotesk', system-ui, sans-serif" }}
+      >
+        {/* Top action bar */}
+        <div
+          className="shrink-0 flex items-center justify-between px-4 bg-[#F5F5F7]"
+          style={{ height: 52 }}
+        >
+          {/* Undo / Redo */}
+          <div className="flex items-center gap-1 bg-white rounded-[10px] border border-gray-200 px-1 py-1">
+            <button
+              onClick={undo}
+              disabled={!canUndo}
+              className="w-8 h-8 flex items-center justify-center rounded-[8px] hover:bg-gray-100 active:bg-gray-200 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            >
+              <Undo2 className="w-4 h-4" />
+            </button>
+            <button
+              onClick={redo}
+              disabled={!canRedo}
+              className="w-8 h-8 flex items-center justify-center rounded-[8px] hover:bg-gray-100 active:bg-gray-200 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            >
+              <Redo2 className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Export */}
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-1.5 h-9 px-4 bg-[#FF6000] hover:bg-[#E55600] text-white rounded-[10px] transition-all active:scale-[0.97] cursor-pointer"
+            style={{ fontWeight: 700, fontSize: 13 }}
+          >
+            <Download className="w-4 h-4" />
+            PNG
+          </button>
+        </div>
+
+        {/* Canvas + floating bottom panel */}
+        <div className="flex-1 relative overflow-hidden">
+          <Canvas ref={canvasRef} onExport={handleExport} />
+          <MobileBottomPanel />
+        </div>
+      </div>
+    );
+  }
+
+  // ── Desktop layout ─────────────────────────────────────────────────────────
   return (
     <div
       className="h-dvh w-screen overflow-hidden bg-[#F5F5F7] text-gray-900 flex items-center justify-center"
@@ -108,8 +174,8 @@ export const EditorLayout = () => {
       {/* Three-column fixed layout — centered on screen, top-aligned */}
       <div className="flex items-start" style={{ gap: 36 }}>
 
-        {/* Left panel — hidden on mobile */}
-        <div className="hidden md:block shrink-0">
+        {/* Left panel */}
+        <div className="shrink-0">
           <LeftPanel />
         </div>
 
@@ -134,8 +200,8 @@ export const EditorLayout = () => {
           />
         </div>
 
-        {/* Right panel — hidden on mobile */}
-        <div className="hidden md:block shrink-0">
+        {/* Right panel */}
+        <div className="shrink-0">
           <RightPanel />
         </div>
 
