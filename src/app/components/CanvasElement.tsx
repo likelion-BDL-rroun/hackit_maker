@@ -1,52 +1,48 @@
-import React, { useRef, useEffect, useCallback, memo } from 'react';
+import React, { useRef, useEffect, useCallback, memo, useState } from 'react';
 import { useEditorStore } from '../store/useEditorStore';
 import { cn } from '../../lib/utils';
 import { EditorElement, FORMATS } from '../store/types';
 
-// ─── TintedImage: renders PNG graphic tinted to a solid color via Canvas 2D.
-// Uses canvas instead of CSS mask-image so html-to-image exports correctly.
-const TintedImage = memo(({ src, color, width, height }: {
-  src: string; color: string; width: number; height: number;
+// ─── TintedImage: renders PNG graphic tinted to a solid color.
+// Tinting is done via an offscreen canvas, then the result is rendered as
+// a plain <img src="data:..."> so html-to-image can serialize it reliably
+// on every platform including mobile Safari/Chrome.
+const TintedImage = memo(({ src, color }: {
+  src: string; color: string;
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [tintedSrc, setTintedSrc] = useState<string>('');
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !src) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!src) return;
 
     const img = new Image();
-    img.crossOrigin = 'anonymous';
     img.onload = () => {
-      canvas.width = width;
-      canvas.height = height;
-      ctx.clearRect(0, 0, width, height);
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+      const offscreen = document.createElement('canvas');
+      offscreen.width = w;
+      offscreen.height = h;
+      const ctx = offscreen.getContext('2d');
+      if (!ctx) return;
 
-      // Contain: scale to fit while preserving aspect ratio, centered
-      const scale = Math.min(width / img.naturalWidth, height / img.naturalHeight);
-      const dw = img.naturalWidth * scale;
-      const dh = img.naturalHeight * scale;
-      const dx = (width - dw) / 2;
-      const dy = (height - dh) / 2;
-
-      ctx.drawImage(img, dx, dy, dw, dh);
-      // Tint: paint color over non-transparent pixels only
+      ctx.drawImage(img, 0, 0, w, h);
+      // Tint: paint color only on non-transparent pixels
       ctx.globalCompositeOperation = 'source-atop';
       ctx.fillStyle = color;
-      ctx.fillRect(0, 0, width, height);
-      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillRect(0, 0, w, h);
+
+      setTintedSrc(offscreen.toDataURL('image/png'));
     };
     img.src = src;
-  }, [src, color, width, height]);
+  }, [src, color]);
+
+  if (!tintedSrc) return null;
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={width}
-      height={height}
-      style={{ width: '100%', height: '100%', display: 'block' }}
+    <img
+      src={tintedSrc}
+      alt=""
+      style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
     />
   );
 });
@@ -281,8 +277,6 @@ export const CanvasElement = ({ element, themeColor, isSelected, onSelect }: Can
             <TintedImage
               src={element.imageUrl}
               color={themeColor}
-              width={element.width}
-              height={element.height}
             />
           ) : (
             <svg viewBox="0 0 100 100" className="w-full h-full block" preserveAspectRatio="xMidYMid meet">
