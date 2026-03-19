@@ -239,7 +239,7 @@ export const MobileBottomPanel = () => {
 
   return (
     // Absolutely positioned at bottom of parent canvas container
-    <div className="absolute bottom-0 left-0 right-0 flex flex-col" style={{ zIndex: 20 }}>
+    <div data-keep-selection className="absolute bottom-0 left-0 right-0 flex flex-col" style={{ zIndex: 20 }}>
 
       {/* ── Sheet content — slides up from below, behind tab bar ─────────────── */}
       <div

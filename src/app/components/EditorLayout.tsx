@@ -27,6 +27,35 @@ export const EditorLayout = () => {
   const canUndo = history.past.length > 0;
   const canRedo = history.future.length > 0;
 
+  // ── Global deselect on outside click ──────────────────────────────────────
+  // Deselects when clicking anywhere except:
+  //   1. The selected element itself
+  //   2. Moveable control handles
+  //   3. Any element marked with data-keep-selection (toolbar, right panel, popover)
+  useEffect(() => {
+    const handlePointerDown = (e: PointerEvent) => {
+      const state = useEditorStore.getState();
+      if (state.selectedIds.length === 0) return;
+
+      const target = e.target as HTMLElement;
+
+      // Preserve selection for marked zones and moveable handles
+      if (target.closest('[data-keep-selection]')) return;
+      if (target.closest('.moveable-control-box')) return;
+      if (target.closest('.moveable-line')) return;
+
+      // Preserve selection if clicking on the selected element itself
+      const selectedId = state.selectedIds[0];
+      const selectedEl = selectedId ? document.getElementById(selectedId) : null;
+      if (selectedEl && selectedEl.contains(target)) return;
+
+      state.deselectAll();
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown, true);
+    return () => document.removeEventListener('pointerdown', handlePointerDown, true);
+  }, []);
+
   // ── PNG export ───────────────────────────────────────────────────────────────
   const handleExport = useCallback(async () => {
     const node = document.getElementById('canvas-area');

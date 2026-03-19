@@ -1,8 +1,8 @@
 import { useEditorStore } from '../store/useEditorStore';
 import {
-  Trash2, Copy, AlignLeft, AlignCenter, AlignRight,
-  MoreHorizontal,
-  Minus, Plus, Type as TypeIcon,
+  Trash2, Copy,
+  Minus, Plus, Bold,
+  AlignLeft, AlignCenter, AlignRight,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -147,13 +147,14 @@ const MobileGraphicToolbar = () => {
 
   return (
     <div
+      data-keep-selection
       className="bg-white shadow-xl rounded-[12px] border border-gray-100 p-1.5 flex items-center gap-1"
       style={{ animation: 'fadeIn 0.15s ease-out' }}
     >
       <button onClick={() => duplicateElement(selectedId)} className="w-6 h-6 flex items-center justify-center hover:bg-gray-100 active:bg-gray-100 rounded-[6px] text-gray-500 hover:text-blue-600 cursor-pointer" title="복제">
         <Copy className="w-4 h-4" />
       </button>
-      <button onClick={() => removeElements([selectedId])} className="w-6 h-6 flex items-center justify-center hover:bg-red-50 active:bg-red-50 rounded-[6px] text-gray-500 hover:text-red-600 cursor-pointer" title="삭제">
+      <button onClick={() => removeElements([selectedId])} className="w-6 h-6 flex items-center justify-center hover:bg-red-50 active:bg-red-50 rounded-[6px] text-red-400 hover:text-red-600 cursor-pointer" title="삭제">
         <Trash2 className="w-4 h-4" />
       </button>
     </div>
@@ -167,14 +168,14 @@ const MobileGraphicToolbar = () => {
 // Level 3: Detail card above level 2
 // ═══════════════════════════════════════════════════════
 
-type TextMenuFeature = 'fontStyle' | 'align';
+// ─── Anchored weight popover (floats above toolbar, near Bold button) ───
+const POPOVER_W = 172;
 
-// ─── Level 3: Detail card ───
-const TextDetailCard = ({
-  feature,
+const FontWeightPopover = ({
+  anchor,
   onClose,
 }: {
-  feature: TextMenuFeature;
+  anchor: { centerX: number; topY: number };
   onClose: () => void;
 }) => {
   const { selectedIds, elements, updateElement } = useEditorStore();
@@ -186,139 +187,115 @@ const TextDetailCard = ({
     updateElement(selectedId, { style: { ...element.style, [key]: value } });
   };
 
-  const fontSize = element.style?.fontSize || 16;
   const fontWeight = element.style?.fontWeight || 400;
-  const textAlign = element.style?.textAlign || 'left';
+
+  // Horizontal: center on Bold button, clamp within viewport
+  const left = Math.max(8, Math.min(window.innerWidth - POPOVER_W - 8, anchor.centerX - POPOVER_W / 2));
+  // Caret x offset relative to card left
+  const caretX = Math.max(12, Math.min(POPOVER_W - 12, anchor.centerX - left));
+  // Vertical: sit above the toolbar (gap of 10px)
+  const bottom = window.innerHeight - anchor.topY + 10;
 
   return (
-    <div
-      className="fixed z-[1000] left-4 right-4 bg-white rounded-[20px] px-4 py-3.5"
-      style={{
-        bottom: 'calc(56px + 16px + 8px + env(safe-area-inset-bottom, 0px))',
-        boxShadow: '0 12px 32px rgba(0,0,0,0.18)',
-        animation: 'detailCardIn 0.2s ease-out',
-      }}
-      onClick={(e) => e.stopPropagation()}
-    >
-      {/* Font style list */}
-      {feature === 'fontStyle' && (
-        <div className="space-y-1 max-h-[240px] overflow-y-auto">
-          {FONT_WEIGHTS.map(fw => (
-            <button
-              key={fw.value}
-              onClick={() => updateStyle('fontWeight', fw.value)}
-              className={cn(
-                "w-full flex items-center justify-between px-3 py-2.5 rounded-[12px] transition-colors cursor-pointer",
-                fontWeight === fw.value
-                  ? "bg-[#FF6000]/10 text-[#FF6000]"
-                  : "text-gray-700 active:bg-gray-50"
-              )}
-            >
-              <span style={{ fontSize: '14px', fontWeight: fw.value, fontFamily: "'Cabinet Grotesk', sans-serif" }}>
-                {fw.label}
-              </span>
-              <span style={{ fontSize: '11px', fontWeight: 500 }} className="text-gray-400">
-                {fw.value}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
+    <>
+      {/* Dismiss backdrop */}
+      <div
+        data-keep-selection
+        className="fixed inset-0 z-[998]"
+        onPointerDown={() => onClose()}
+      />
 
-      {/* Alignment toggle */}
-      {feature === 'align' && (
-        <div className="flex gap-2">
-          {([
-            { align: 'left' as const, icon: AlignLeft, label: '좌측' },
-            { align: 'center' as const, icon: AlignCenter, label: '가운데' },
-            { align: 'right' as const, icon: AlignRight, label: '우측' },
-          ]).map(({ align, icon: Icon, label }) => (
-            <button
-              key={align}
-              onClick={() => updateStyle('textAlign', align)}
-              className={cn(
-                "flex-1 h-12 flex items-center justify-center gap-2 rounded-[14px] transition-colors cursor-pointer",
-                textAlign === align
-                  ? "bg-[#FF6000] text-white"
-                  : "bg-gray-100 text-gray-600 active:bg-gray-200"
-              )}
-            >
-              <Icon className="w-5 h-5" />
-              <span style={{ fontSize: '13px', fontWeight: 600 }}>{label}</span>
-            </button>
-          ))}
-        </div>
-      )}
+      {/* Popover card */}
+      <div
+        data-keep-selection
+        className="fixed z-[999] bg-white rounded-[14px] overflow-hidden"
+        style={{
+          left,
+          bottom,
+          width: POPOVER_W,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.06)',
+          animation: 'popoverIn 0.2s cubic-bezier(0.34, 1.4, 0.64, 1)',
+          transformOrigin: `${caretX}px 100%`,
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        {/* Caret (downward triangle pointing to Bold button) */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: -5,
+            left: caretX - 5,
+            width: 10,
+            height: 10,
+            background: 'white',
+            transform: 'rotate(45deg)',
+            borderRadius: '0 0 2px 0',
+            zIndex: -1,
+            boxShadow: '2px 2px 4px rgba(0,0,0,0.07)',
+          }}
+        />
 
-    </div>
+        <div className="py-1.5 overflow-y-auto" style={{ maxHeight: 268 }}>
+          {FONT_WEIGHTS.map(fw => {
+            const isActive = fontWeight === fw.value;
+            return (
+              <button
+                key={fw.value}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => {
+                  updateStyle('fontWeight', fw.value);
+                  onClose();
+                }}
+                className={cn(
+                  "w-full flex items-center justify-between px-3 py-[7px] transition-colors cursor-pointer",
+                  isActive ? "bg-[#FF6000]/5" : "active:bg-gray-50",
+                )}
+              >
+                <span
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: fw.value,
+                    fontFamily: "'Cabinet Grotesk', sans-serif",
+                    color: isActive ? '#FF6000' : '#374151',
+                  }}
+                >
+                  {fw.label}
+                </span>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: isActive ? 700 : 400,
+                    color: isActive ? '#FF6000' : '#9CA3AF',
+                  }}
+                >
+                  {isActive ? '✓' : fw.value}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </>
   );
 };
 
-// ─── Level 2: Bottom pill bar ───
-const TextBottomBar = ({
-  activeFeature,
-  onSelectFeature,
-}: {
-  activeFeature: TextMenuFeature | null;
-  onSelectFeature: (f: TextMenuFeature | null) => void;
-}) => {
-  const features: { id: TextMenuFeature; icon: React.ElementType; label: string }[] = [
-    { id: 'fontStyle', icon: TypeIcon, label: '스타일' },
-    { id: 'align', icon: AlignCenter, label: '정렬' },
-  ];
 
-  return (
-    <div
-      className="fixed z-[1000] left-4 right-4 h-[56px] bg-white rounded-[28px] flex items-center justify-around px-3"
-      style={{
-        bottom: 'calc(16px + env(safe-area-inset-bottom, 0px))',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-        animation: 'bottomBarSlideIn 0.2s ease',
-      }}
-      onClick={(e) => e.stopPropagation()}
-    >
-      {features.map(({ id, icon: Icon, label }) => (
-        <button
-          key={id}
-          onClick={() => onSelectFeature(activeFeature === id ? null : id)}
-          className={cn(
-            "flex flex-col items-center justify-center gap-0.5 min-w-[56px] h-[48px] rounded-[16px] transition-colors cursor-pointer",
-            activeFeature === id
-              ? "bg-[#FF6000]/10 text-[#FF6000]"
-              : "text-gray-500 active:bg-gray-100"
-          )}
-        >
-          <Icon className="w-5 h-5" />
-          <span style={{ fontSize: '10px', fontWeight: activeFeature === id ? 700 : 500 }}>{label}</span>
-        </button>
-      ))}
-    </div>
-  );
-};
-
-// ─── Level 1: Floating toolbar (4 buttons only) ───
+// ─── Floating toolbar ───
 const MobileTextToolbar = () => {
   const {
     selectedIds, elements, updateElement, removeElements, duplicateElement,
-    mobileTextMenuOpen, setMobileTextMenuOpen,
   } = useEditorStore();
 
-  const [activeFeature, setActiveFeature] = useState<TextMenuFeature | null>(null);
+  const [styleOpen, setStyleOpen] = useState(false);
+  const [styleAnchor, setStyleAnchor] = useState<{ centerX: number; topY: number } | null>(null);
+  const boldBtnRef = useRef<HTMLButtonElement>(null);
 
   const selectedId = selectedIds[0];
   const element = elements.find(el => el.id === selectedId);
 
-  // Clean up when unmounted or deselected
   useEffect(() => {
-    return () => {
-      setMobileTextMenuOpen(false);
-    };
-  }, [setMobileTextMenuOpen]);
-
-  // Close feature when menu closes
-  useEffect(() => {
-    if (!mobileTextMenuOpen) setActiveFeature(null);
-  }, [mobileTextMenuOpen]);
+    return () => setStyleOpen(false);
+  }, []);
 
   if (!element || element.type !== 'text') return null;
 
@@ -328,16 +305,19 @@ const MobileTextToolbar = () => {
 
   const fontSize = element.style?.fontSize || 16;
 
-  const handleMenuToggle = () => {
-    const next = !mobileTextMenuOpen;
-    setMobileTextMenuOpen(next);
-    if (!next) setActiveFeature(null);
+  const handleStyleToggle = () => {
+    if (!styleOpen && boldBtnRef.current) {
+      const rect = boldBtnRef.current.getBoundingClientRect();
+      setStyleAnchor({ centerX: rect.left + rect.width / 2, topY: rect.top });
+    }
+    setStyleOpen(v => !v);
   };
 
   return (
     <>
-      {/* ── Level 1: Floating toolbar ── */}
+      {/* ── Floating toolbar ── */}
       <div
+        data-keep-selection
         className="bg-white shadow-xl rounded-[14px] border border-gray-100 p-1.5 flex items-center gap-1"
         style={{ animation: 'fadeIn 0.15s ease-out' }}
       >
@@ -358,6 +338,19 @@ const MobileTextToolbar = () => {
 
         <div className="w-px h-4 bg-gray-200 mx-0.5" />
 
+        {/* Style (font weight) — anchors popover above itself */}
+        <button
+          ref={boldBtnRef}
+          onClick={handleStyleToggle}
+          className={cn(
+            "w-6 h-6 flex items-center justify-center rounded-[6px] cursor-pointer transition-colors",
+            styleOpen ? "bg-[#FF6000]/10 text-[#FF6000]" : "text-gray-500 hover:bg-gray-100 active:bg-gray-100"
+          )}
+          title="폰트 굵기"
+        >
+          <Bold className="w-4 h-4" />
+        </button>
+
         {/* Copy */}
         <button
           onClick={() => duplicateElement(selectedId)}
@@ -370,56 +363,27 @@ const MobileTextToolbar = () => {
         {/* Delete */}
         <button
           onClick={() => removeElements([selectedId])}
-          className="w-6 h-6 flex items-center justify-center rounded-[6px] text-gray-500 hover:bg-red-50 active:bg-red-50 active:text-red-500 cursor-pointer"
+          className="w-6 h-6 flex items-center justify-center rounded-[6px] text-red-400 hover:bg-red-50 active:bg-red-50 hover:text-red-600 active:text-red-600 cursor-pointer"
           title="삭제"
         >
           <Trash2 className="w-4 h-4" />
         </button>
-
-        <div className="w-px h-4 bg-gray-200 mx-0.5" />
-
-        {/* Menu "…" */}
-        <button
-          onClick={handleMenuToggle}
-          className={cn(
-            "w-6 h-6 flex items-center justify-center rounded-[6px] cursor-pointer transition-colors",
-            mobileTextMenuOpen
-              ? "bg-[#FF6000]/10 text-[#FF6000]"
-              : "text-gray-500 hover:bg-gray-100 active:bg-gray-100"
-          )}
-          title="메뉴"
-        >
-          <MoreHorizontal className="w-4 h-4" />
-        </button>
       </div>
 
-      {/* ── Level 2: Bottom pill bar (portaled to escape stacking context) ── */}
-      {mobileTextMenuOpen && createPortal(
-        <TextBottomBar
-          activeFeature={activeFeature}
-          onSelectFeature={setActiveFeature}
-        />,
-        document.body,
-      )}
-
-      {/* ── Level 3: Detail card (portaled to escape stacking context) ── */}
-      {mobileTextMenuOpen && activeFeature && createPortal(
-        <TextDetailCard
-          feature={activeFeature}
-          onClose={() => setActiveFeature(null)}
+      {/* ── Font weight popover, anchored above Bold button ── */}
+      {styleOpen && styleAnchor && createPortal(
+        <FontWeightPopover
+          anchor={styleAnchor}
+          onClose={() => setStyleOpen(false)}
         />,
         document.body,
       )}
 
       {/* Animations */}
       <style>{`
-        @keyframes bottomBarSlideIn {
-          from { transform: translateX(40px); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes detailCardIn {
-          from { transform: translateY(12px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
+        @keyframes popoverIn {
+          from { opacity: 0; transform: scale(0.88) translateY(6px); }
+          to   { opacity: 1; transform: scale(1)    translateY(0);    }
         }
       `}</style>
     </>
@@ -445,7 +409,7 @@ const DesktopToolbar = () => {
   };
 
   return (
-    <div className="bg-white shadow-xl rounded-[12px] border border-gray-100 p-1.5 flex items-center gap-1 z-50" style={{ animation: 'fadeIn 0.15s ease-out' }}>
+    <div data-keep-selection className="bg-white shadow-xl rounded-[12px] border border-gray-100 p-1.5 flex items-center gap-1 z-50" style={{ animation: 'fadeIn 0.15s ease-out' }}>
       {isText && (
         <>
           {/* Font Weight Selector */}
@@ -530,7 +494,7 @@ const DesktopToolbar = () => {
         <button onClick={() => duplicateElement(selectedId)} className="w-6 h-6 flex items-center justify-center hover:bg-gray-100 rounded-[6px] text-gray-500 hover:text-blue-600 cursor-pointer" title="복제">
           <Copy className="w-4 h-4" />
         </button>
-        <button onClick={() => removeElements([selectedId])} className="w-6 h-6 flex items-center justify-center hover:bg-red-50 rounded-[6px] text-gray-500 hover:text-red-600 cursor-pointer" title="삭제">
+        <button onClick={() => removeElements([selectedId])} className="w-6 h-6 flex items-center justify-center hover:bg-red-50 rounded-[6px] text-red-400 hover:text-red-600 cursor-pointer" title="삭제">
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
