@@ -42,6 +42,8 @@ const TintedImage = memo(({ src, color }: {
     <img
       src={tintedSrc}
       alt=""
+      loading="eager"
+      crossOrigin="anonymous"
       style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
     />
   );
