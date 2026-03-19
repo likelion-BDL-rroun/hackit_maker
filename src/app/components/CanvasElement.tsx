@@ -1,7 +1,55 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, memo } from 'react';
 import { useEditorStore } from '../store/useEditorStore';
 import { cn } from '../../lib/utils';
 import { EditorElement, FORMATS } from '../store/types';
+
+// ─── TintedImage: renders PNG graphic tinted to a solid color via Canvas 2D.
+// Uses canvas instead of CSS mask-image so html-to-image exports correctly.
+const TintedImage = memo(({ src, color, width, height }: {
+  src: string; color: string; width: number; height: number;
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !src) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      canvas.width = width;
+      canvas.height = height;
+      ctx.clearRect(0, 0, width, height);
+
+      // Contain: scale to fit while preserving aspect ratio, centered
+      const scale = Math.min(width / img.naturalWidth, height / img.naturalHeight);
+      const dw = img.naturalWidth * scale;
+      const dh = img.naturalHeight * scale;
+      const dx = (width - dw) / 2;
+      const dy = (height - dh) / 2;
+
+      ctx.drawImage(img, dx, dy, dw, dh);
+      // Tint: paint color over non-transparent pixels only
+      ctx.globalCompositeOperation = 'source-atop';
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, width, height);
+      ctx.globalCompositeOperation = 'source-over';
+    };
+    img.src = src;
+  }, [src, color, width, height]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={width}
+      height={height}
+      style={{ width: '100%', height: '100%', display: 'block' }}
+    />
+  );
+});
 
 interface CanvasElementProps {
   element: EditorElement;
@@ -230,19 +278,11 @@ export const CanvasElement = ({ element, themeColor, isSelected, onSelect }: Can
       ) : (
         <div className="w-full h-full pointer-events-none flex items-center justify-center">
           {element.imageUrl ? (
-            <div
-              className="w-full h-full"
-              style={{
-                backgroundColor: themeColor,
-                WebkitMaskImage: `url(${element.imageUrl})`,
-                WebkitMaskSize: 'contain',
-                WebkitMaskRepeat: 'no-repeat',
-                WebkitMaskPosition: 'center',
-                maskImage: `url(${element.imageUrl})`,
-                maskSize: 'contain',
-                maskRepeat: 'no-repeat',
-                maskPosition: 'center',
-              }}
+            <TintedImage
+              src={element.imageUrl}
+              color={themeColor}
+              width={element.width}
+              height={element.height}
             />
           ) : (
             <svg viewBox="0 0 100 100" className="w-full h-full block" preserveAspectRatio="xMidYMid meet">

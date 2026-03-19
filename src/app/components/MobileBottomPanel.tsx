@@ -98,19 +98,18 @@ export const MobileBottomPanel = () => {
     const cfg = RANDOM_LAYOUTS[format]?.[type] ?? RANDOM_LAYOUTS['1:1'][type];
     const newElements: Parameters<typeof setAllElements>[0] = [];
 
-    // Logo
-    const logoGraphic = GRAPHICS.find(g => g.name === '멋사 심볼');
-    if (logoGraphic) {
-      const lw = 60 * sizeMultiplier;
-      const lh = 60 * sizeMultiplier;
-      newElements.push({
-        id: nanoid(), type: 'graphic',
-        x: Math.round((canvasW - lw) / 2), y: cfg.logoTop,
-        width: lw, height: lh, rotation: 0, visible: true, locked: false,
-        graphicName: logoGraphic.name, style: { color: themeColor },
-        content: logoGraphic.path, imageUrl: logoGraphic.imageUrl,
-      });
-    }
+    // Logo (국문) — LeftPanel과 동일한 방식
+    const logo = BRAND_LOGOS.find((l) => l.name === '멋사대학') || BRAND_LOGOS[1];
+    const logoH = isA3 ? 143 : format === '1:1' ? 22 : 34;
+    const logoRatio = (logo.defaultWidth ?? 251) / (logo.defaultHeight ?? 40);
+    const logoW = Math.round(logoH * logoRatio);
+    newElements.push({
+      id: nanoid(), type: 'graphic',
+      x: Math.round((canvasW - logoW) / 2), y: cfg.logoTop,
+      width: logoW, height: logoH, rotation: 0, visible: true, locked: false,
+      graphicName: logo.name, style: { color: themeColor },
+      content: logo.path, imageUrl: logo.imageUrl, isLogo: true,
+    });
 
     // Graphics (no duplicates)
     const symbolGraphics = GRAPHICS.filter(g => !g.isLogo);
