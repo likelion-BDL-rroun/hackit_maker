@@ -57,6 +57,62 @@ export const EditorLayout = () => {
   }, []);
 
   // ── PNG export ───────────────────────────────────────────────────────────────
+
+  // html-to-image doesn't inline mask-image/webkit-mask-image URLs.
+  // Pre-convert all mask URLs to data URLs so they render correctly on export.
+  const inlineMaskImages = async (node: HTMLElement) => {
+    const masked = Array.from(
+      node.querySelectorAll<HTMLElement>('[style*="mask-image"], [style*="-webkit-mask-image"]')
+    );
+
+    const urlToDataUrl = new Map<string, string>();
+
+    const extractUrl = (cssValue: string) => {
+      const m = cssValue.match(/url\(["']?([^"')]+)["']?\)/);
+      return m ? m[1] : null;
+    };
+
+    const fetchDataUrl = async (url: string): Promise<string> => {
+      if (urlToDataUrl.has(url)) return urlToDataUrl.get(url)!;
+      // Already a data URL — no need to fetch
+      if (url.startsWith('data:')) { urlToDataUrl.set(url, url); return url; }
+      const resp = await fetch(url);
+      const blob = await resp.blob();
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          urlToDataUrl.set(url, result);
+          resolve(result);
+        };
+        reader.readAsDataURL(blob);
+      });
+    };
+
+    type MaskBackup = { el: HTMLElement; mask: string; webkitMask: string };
+    const backups: MaskBackup[] = [];
+
+    await Promise.all(
+      masked.map(async (el) => {
+        const mask = el.style.maskImage;
+        const webkitMask = el.style.webkitMaskImage;
+        const srcUrl = extractUrl(mask) || extractUrl(webkitMask);
+        if (!srcUrl) return;
+        try {
+          const dataUrl = await fetchDataUrl(srcUrl);
+          backups.push({ el, mask, webkitMask });
+          const inlined = `url("${dataUrl}")`;
+          el.style.maskImage = inlined;
+          el.style.webkitMaskImage = inlined;
+        } catch (e) {
+          console.warn('[export] mask-image inline failed:', srcUrl, e);
+        }
+      })
+    );
+
+    return backups;
+  };
+
   const handleExport = useCallback(async () => {
     const node = document.getElementById('canvas-area');
     if (!node) {
@@ -78,8 +134,13 @@ export const EditorLayout = () => {
     node.style.filter = 'none';
     node.style.overflow = 'hidden';
 
+    let maskBackups: { el: HTMLElement; mask: string; webkitMask: string }[] = [];
+
     try {
       toast('내보내기 준비 중...', { duration: 2000 });
+
+      // Inline mask-image URLs before capture
+      maskBackups = await inlineMaskImages(node);
 
       const dataUrl = await toPng(node, {
         quality: 1.0,
@@ -101,6 +162,11 @@ export const EditorLayout = () => {
       console.error(error);
       toast.error('내보내기에 실패했습니다');
     } finally {
+      // Restore original mask-image styles
+      maskBackups.forEach(({ el, mask, webkitMask }) => {
+        el.style.maskImage = mask;
+        el.style.webkitMaskImage = webkitMask;
+      });
       node.style.filter = prevFilter;
       node.style.overflow = prevOverflow;
       overlayEls.forEach((el) => ((el as HTMLElement).style.display = ''));

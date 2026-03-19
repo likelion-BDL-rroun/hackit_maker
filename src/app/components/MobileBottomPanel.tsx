@@ -241,6 +241,19 @@ export const MobileBottomPanel = () => {
     // Absolutely positioned at bottom of parent canvas container
     <div data-keep-selection className="absolute bottom-0 left-0 right-0 flex flex-col" style={{ zIndex: 20 }}>
 
+      {/* ── Backdrop — covers canvas above panel, tapping closes sheet ────────── */}
+      {isOpen && (
+        <div
+          className="absolute left-0 right-0"
+          style={{
+            bottom: SHEET_HEIGHT + TAB_BAR_HEIGHT,
+            top: -(9999), // extend far above
+            zIndex: 0,
+          }}
+          onPointerDown={() => setIsOpen(false)}
+        />
+      )}
+
       {/* ── Sheet content — slides up from below, behind tab bar ─────────────── */}
       <div
         className="overflow-y-auto"
@@ -248,16 +261,30 @@ export const MobileBottomPanel = () => {
           height: SHEET_HEIGHT,
           transform: isOpen ? 'translateY(0)' : `translateY(${SHEET_HEIGHT}px)`,
           transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          paddingLeft: 16, paddingRight: 16, paddingTop: 16, paddingBottom: 16,
+          paddingLeft: 16, paddingRight: 16, paddingTop: 8, paddingBottom: 16,
           boxShadow: '0 -4px 24px rgba(0,0,0,0.08)',
           zIndex: 1,
           position: 'relative',
           background: 'rgba(252, 252, 253, 0.6)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
           borderRadius: '20px 20px 0 0',
         }}
       >
+        {/* ── Grabber ─────────────────────────────────────── */}
+        <div
+          className="flex justify-center mb-2"
+          onPointerDown={() => setIsOpen(false)}
+          style={{ cursor: 'pointer', paddingTop: 4, paddingBottom: 4, marginLeft: -16, marginRight: -16 }}
+        >
+          <div
+            style={{
+              width: 36, height: 4,
+              borderRadius: 2,
+              background: 'rgba(0,0,0,0.18)',
+            }}
+          />
+        </div>
 
         {/* ═══ 에셋 ═══ */}
         {activeTab === '에셋' && (
