@@ -370,8 +370,10 @@ export const MobileBottomPanel = () => {
               </div>
             </div>
 
-            {/* 텍스트 추가 */}
-            <button
+            {/* 텍스트 */}
+            <div>
+              <SectionTitle>텍스트</SectionTitle>
+              <button
               onClick={handleAddText}
               className="flex items-center justify-center gap-2 rounded-[10px] bg-[#FF6000] hover:bg-[#E55600] text-white transition-all cursor-pointer active:scale-[0.98] w-full"
               style={{ height: 40, fontSize: 14, fontWeight: 600 }}
@@ -379,6 +381,7 @@ export const MobileBottomPanel = () => {
               <TypeIcon className="w-4 h-4" />
               텍스트 추가
             </button>
+            </div>
           </div>
         )}
 
